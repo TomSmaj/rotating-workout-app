@@ -1,0 +1,19 @@
+{
+  "name": "rotating-workout-app",
+  "version": "1.0.0",
+  "description": "Simple SPA in which a rotating workout list is displayed and cycled through",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TomSmaj/Rotating-Workout-App.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TomSmaj/Rotating-Workout-App/issues"
+  },
+  "homepage": "https://github.com/TomSmaj/Rotating-Workout-App#readme"
+}
