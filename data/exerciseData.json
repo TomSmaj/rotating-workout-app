@@ -1,71 +1,85 @@
 {
+    "order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+    ],
     "0": {
         "name": "Spread Overhand Pullups",
         "sets": 3,
         "reps": 12,
         "startWeight": null
     },
-    "1":{
+    "1": {
         "name": "Close Overhand Pullups",
         "sets": 3,
         "reps": 12,
         "startWeight": null
     },
-    "2":{
+    "2": {
         "name": "Underhand Pullups",
         "sets": 3,
         "reps": 12,
         "startWeight": null
     },
-    "3":{
+    "3": {
         "name": "Bicep Curls",
         "sets": 4,
         "reps": 8,
         "startWeight": 40
     },
-    "4":{
+    "4": {
         "name": "Tricep Press",
         "sets": 3,
         "reps": 12,
         "startWeight": 55
     },
-    "5":{
+    "5": {
         "name": "Bench Press",
         "sets": 3,
         "reps": 12,
         "startWeight": 140
     },
-    "6":{
+    "6": {
         "name": "Dumbbell Flies",
         "sets": 3,
         "reps": 12,
         "startWeight": 55
     },
-    "7":{
+    "7": {
         "name": "Inclined Dumbbell Bench",
         "sets": 3,
         "reps": 12,
         "startWeight": 55
     },
-    "8":{
+    "8": {
         "name": "Reverse Flies",
         "sets": 3,
         "reps": 15,
         "startWeight": 20
     },
-    "9":{
+    "9": {
         "name": "Dead Lifts",
         "sets": 3,
         "reps": 12,
         "startWeight": 140
     },
-    "10":{
+    "10": {
         "name": "Linear Leg Press",
         "sets": 3,
         "reps": 12,
         "startWeight": 230
     },
-    "11":{
+    "11": {
         "name": "Weighted Twist Situps",
         "sets": 3,
         "reps": 15,
