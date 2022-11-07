@@ -1,7 +1,7 @@
 .exercise{
-    width: 80%;
     height: 15%;
     border: 1px solid black;
+    border-radius: 5px;
     margin: auto;
     margin-top: 2.5px;
     margin-bottom: 2.5px;
@@ -13,12 +13,12 @@
 }
 
 .exerEditButton{
+    margin: 1px;
     margin-left: 50px;
-    margin-top: 5px;
 }
 
 .exerDoneButton{
     float: right;
-    margin-right: 50px;
-    margin-top: 5px;
+    margin: 1px;
+    margin-right: 50px;    
 }

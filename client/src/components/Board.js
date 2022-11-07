@@ -23,11 +23,19 @@ class Board extends Component {
         console.log("exerciseData output in render:")
         console.log(this.state.exerciseData);
         return (
-            <div className="exerciseBoard">
+            <div className="exerciseBoard container">
+                <div className="row">
+                    <button type="button" className="btn btn-danger exerAddButton col-9">Add Exercise</button>
+                </div>
                 {Object.keys(this.state.exerciseData).map(exercisePosition => {
                     let exercise = this.state.exerciseData[exercisePosition];
                     console.log(exercise.name);
-                    return <Exercise name={exercise.name} sets={exercise.sets} reps={exercise.reps} weight={exercise.weight} />
+
+                    return (
+                        <div className="row">
+                            <Exercise name={exercise.name} sets={exercise.sets} reps={exercise.reps} weight={exercise.weight} />
+                        </div>
+                    )
                 })}
             </div>
         )

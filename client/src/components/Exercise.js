@@ -5,9 +5,9 @@ class Exercise extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            name: props.name,
-            sets: props.sets,
-            reps: props.reps,
+            name: (props.name ? props.name : "-"),
+            sets: (props.sets ? props.sets : "-"),
+            reps: (props.reps ? props.reps : "-"),
             weight: (props.weight ? props.weight : "-")
         }
 
@@ -16,7 +16,7 @@ class Exercise extends Component {
 
     render() {
         return (
-            <div className="exercise">                
+            <div className="exercise col-9">                
                     <div className="exerciseName"><strong>{this.state.name}</strong></div>
                     <div className="exerciseSets">Sets: {this.state.sets}</div>
                     <div className="exerciseReps">Reps: {this.state.reps}</div>
