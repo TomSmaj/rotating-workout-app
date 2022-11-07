@@ -28,9 +28,7 @@ class Board extends Component {
                     let exercise = this.state.exerciseData[exercisePosition];
                     console.log(exercise.name);
                     return <Exercise name={exercise.name} sets={exercise.sets} reps={exercise.reps} weight={exercise.weight} />
-                    // <Exercise name={"hello"} sets={"3"} reps={"12"} weight={"100"} />
                 })}
-                {/* <Exercise name={"hello"} sets={"3"} reps={"12"} weight={"100"} /> */}
             </div>
         )
     }

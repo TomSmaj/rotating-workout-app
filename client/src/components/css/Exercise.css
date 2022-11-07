@@ -6,3 +6,19 @@
     margin-top: 2.5px;
     margin-bottom: 2.5px;
 }
+
+.exerciseName{
+    width: 100%;
+    text-align: center;
+}
+
+.exerEditButton{
+    margin-left: 50px;
+    margin-top: 5px;
+}
+
+.exerDoneButton{
+    float: right;
+    margin-right: 50px;
+    margin-top: 5px;
+}

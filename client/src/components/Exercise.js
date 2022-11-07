@@ -16,13 +16,13 @@ class Exercise extends Component {
 
     render() {
         return (
-            <div className="exercise">
-                <ul>
-                    <li>{this.state.name}</li>
-                    <li>{this.state.sets}</li>
-                    <li>{this.state.reps}</li>
-                    <li>{this.state.weight}</li>
-                </ul>
+            <div className="exercise">                
+                    <div className="exerciseName"><strong>{this.state.name}</strong></div>
+                    <div className="exerciseSets">Sets: {this.state.sets}</div>
+                    <div className="exerciseReps">Reps: {this.state.reps}</div>
+                    <div className="exerciseWeight">Weight: {this.state.weight}</div>
+                <button type="button" class="btn btn-secondary exerEditButton">Edit</button>
+                <button type="button" class="btn btn-primary exerDoneButton">Done</button>
             </div>
         )
     }
