@@ -16,13 +16,23 @@ class Exercise extends Component {
 
     render() {
         return (
-            <div className="exercise col-9">                
+            <div className="exercise col-9">
+                <div className="row">
                     <div className="exerciseName"><strong>{this.state.name}</strong></div>
+                </div>
+                <div className="row">
                     <div className="exerciseSets">Sets: {this.state.sets}</div>
                     <div className="exerciseReps">Reps: {this.state.reps}</div>
                     <div className="exerciseWeight">Weight: {this.state.weight}</div>
-                <button type="button" class="btn btn-secondary exerEditButton">Edit</button>
-                <button type="button" class="btn btn-primary exerDoneButton">Done</button>
+                </div>
+                <div className="row">
+                    <div className="col-sm">
+                        <button type="button" move="up" class="exerBtn btn btn-warning"><i class="bi bi-arrow-up-square"></i></button>
+                        <button type="button" move="down" class="exerBtn btn btn-warning"><i class="bi bi-arrow-down-square"></i></button>
+                        <button type="button" class="exerBtn btn btn-secondary">Edit</button>
+                        <button type="button" move="done" class="exerBtn btn btn-primary">Done</button>
+                    </div>
+                </div>
             </div>
         )
     }
