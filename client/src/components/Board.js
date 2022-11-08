@@ -27,16 +27,15 @@ class Board extends Component {
                 <div className="row">
                     <button type="button" className="btn btn-danger exerAddButton col-9">Add Exercise</button>
                 </div>
-                {Object.keys(this.state.exerciseData).map(exercisePosition => {
+                {this.state.exerciseOrder.map(exercisePosition => {
                     let exercise = this.state.exerciseData[exercisePosition];
-                    console.log(exercise.name);
-
                     return (
                         <div className="row">
                             <Exercise name={exercise.name} sets={exercise.sets} reps={exercise.reps} weight={exercise.weight} />
                         </div>
                     )
-                })}
+                })
+                }
             </div>
         )
     }
