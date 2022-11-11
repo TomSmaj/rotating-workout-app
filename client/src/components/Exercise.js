@@ -8,11 +8,20 @@ class Exercise extends Component {
             name: (props.name ? props.name : "-"),
             sets: (props.sets ? props.sets : "-"),
             reps: (props.reps ? props.reps : "-"),
-            weight: (props.weight ? props.weight : "-")
+            weight: (props.weight ? props.weight : "-"),
+            exerciseId: (props.exerciseId)
         }
+        this.moveExercise = this.moveExercise.bind(this);
+    }
+
+    componentDidMount(){
 
     }
 
+    moveExercise = (event) => {        
+        let direction = event.target.dataset.direction;
+        console.log("moveExercise clicked: " + direction + ", exerciseId: " + this.state.exerciseId);
+    }
 
     render() {
         return (
@@ -27,15 +36,17 @@ class Exercise extends Component {
                 </div>
                 <div className="row">
                     <div className="col-sm">
-                        <button type="button" move="up" class="exerBtn btn btn-warning"><i class="bi bi-arrow-up-square"></i></button>
-                        <button type="button" move="down" class="exerBtn btn btn-warning"><i class="bi bi-arrow-down-square"></i></button>
-                        <button type="button" class="exerBtn btn btn-secondary">Edit</button>
-                        <button type="button" move="done" class="exerBtn btn btn-primary">Done</button>
+                        <button type="button" data-direction="up" className="exerBtn btn btn-warning" onClick={this.moveExercise}><i data-direction="up" className="bi bi-arrow-up-square"></i></button>
+                        <button type="button" data-direction="down" onClick={this.moveExercise} className="exerBtn btn btn-warning"><i data-direction="down" className="bi bi-arrow-down-square"></i></button>
+                        <button type="button" className="exerBtn btn btn-secondary">Edit</button>
+                        <button type="button" data-direction="done" onClick={this.moveExercise} className="exerBtn btn btn-primary">Done</button>
                     </div>
                 </div>
             </div>
         )
     }
+
+    
 }
 
 export default Exercise;

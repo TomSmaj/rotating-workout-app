@@ -31,7 +31,7 @@ class Board extends Component {
                     let exercise = this.state.exerciseData[exercisePosition];
                     return (
                         <div className="row">
-                            <Exercise name={exercise.name} sets={exercise.sets} reps={exercise.reps} weight={exercise.weight} />
+                            <Exercise name={exercise.name} sets={exercise.sets} reps={exercise.reps} weight={exercise.weight} exerciseId={exercisePosition} />
                         </div>
                     )
                 })
