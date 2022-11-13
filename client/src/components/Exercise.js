@@ -9,7 +9,7 @@ class Exercise extends Component {
             sets: (props.sets ? props.sets : "-"),
             reps: (props.reps ? props.reps : "-"),
             weight: (props.weight ? props.weight : "-"),
-            exerciseId: (props.exerciseId)
+            exerciseId: props.exerciseId
         }        
     }
 

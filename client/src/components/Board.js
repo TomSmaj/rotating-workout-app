@@ -1,4 +1,4 @@
-import React, { Component, useImperativeHandle } from 'react';
+import React, { Component } from 'react';
 import $ from 'jquery';
 import Exercise from './Exercise';
 import "./css/Board.css"
