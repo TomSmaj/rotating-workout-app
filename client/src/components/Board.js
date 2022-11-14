@@ -8,9 +8,10 @@ class Board extends Component {
         super(props);
         this.state = {
             exerciseData: {},
-            exerciseOrder: []
+            exerciseOrder: [],
         }
         this.moveExercise = this.moveExercise.bind(this);
+        this.updateExerciseInfo = this.updateExerciseInfo.bind(this); 
     }
 
     componentDidMount() {
@@ -47,7 +48,7 @@ class Board extends Component {
                 let lastIndex = currentOrder.length - 1;
                 let found = false;
                 // don't perform move if exercise clicked is the last exercise
-                if (position != lastIndex) {
+                if (position !== lastIndex) {
                     for (let index = 0; index < currentOrder.length; index++) {
                         // when we arrive at the position of the exercise that was clicked, change found to true and set position of done exercise in NewOrder to the exercise following the done exercise
                         if (index === position) {
@@ -55,11 +56,11 @@ class Board extends Component {
                             newOrder[index] = currentOrder[index + 1];
                         }
                         // until the position where the clicked exercise is reached, newOrder is the same as old order
-                        else if (!found && index != lastIndex) {
+                        else if (!found && index !== lastIndex) {
                             newOrder[index] = currentOrder[index];
                         }
                         // after position of clicked exercise has been reached, each newOrder spot is equal to currentOrder position + 1
-                        else if (found && index != lastIndex) {
+                        else if (found && index !== lastIndex) {
                             newOrder[index] = currentOrder[index + 1];
                         }
                         // at the last position, assign the done exercise, which was saved in positionValue
@@ -101,6 +102,10 @@ class Board extends Component {
         this.setState({exerciseOrder: newOrder});
     }
 
+    updateExerciseInfo = () => {
+        console.log("updatedExerciseInfo reached");
+    }
+
     render() {
         return (
             <div className="exerciseBoard container">
@@ -117,6 +122,7 @@ class Board extends Component {
                                 weight={exercise.weight}
                                 exerciseId={exercisePosition}
                                 moveExercise={this.moveExercise}
+                                updateExerciseInfo={this.updateExerciseInfo}
                                 key={exercisePosition} />
                         </div>
                     )
