@@ -5,12 +5,12 @@ class Exercise extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            name: (props.name ? props.name : "-"),
+            /*{name: (props.name ? props.name : "-"),
             sets: (props.sets ? props.sets : "-"),
             reps: (props.reps ? props.reps : "-"),
-            weight: (props.weight ? props.weight : "-"),
+            weight: (props.weight ? props.weight : "-"),*/
             exerciseId: props.exerciseId,
-            isEditMode: false
+            exerEditMode: false
         }
         this.toggleEditMode = this.toggleEditMode.bind(this);
     }
@@ -20,7 +20,7 @@ class Exercise extends Component {
     }
 
     toggleEditMode = () => {
-        this.setState({ isEditMode: !this.state.isEditMode });
+        this.setState({ exerEditMode: !this.state.exerEditMode });
     }
 
     render() {
@@ -28,16 +28,16 @@ class Exercise extends Component {
             <div className="exercise col-9">
                 {/* Exercise Name */}
                 <div className="row">
-                    {!this.state.isEditMode ? 
-                    <div className="exerciseName"><strong>{this.state.name}</strong></div> :
-                    <input type="text" className="exerciseNameInput" placeholder={this.state.name} />
-                }
+                    {!this.state.exerEditMode ?
+                        <strong><div className="exerciseName">{this.props.name}</div></strong> :
+                        <input type="text" className={"exerciseNameInput-" + this.state.exerciseId} placeholder={this.props.name} />
+                    }
                 </div>
                 {/* Reps, sets, and weight */}
                 <div className="row">
-                    <div className="exerciseSets">Sets: {!this.state.isEditMode ? this.state.sets : <input type="text" className="exerciseSetsInput" placeholder={this.state.sets} /> }</div>
-                    <div className="exerciseReps">Reps: {!this.state.isEditMode ? this.state.reps : <input type="text" className="exerciseRepsInput" placeholder={this.state.reps} />}</div>
-                    <div className="exerciseWeight">Weight: {!this.state.isEditMode ? this.state.weight : <input type="text" className="exerciseWeightInput" placeholder={this.state.weight} />}</div>
+                    <div className="exerciseSets">Sets: {!this.state.exerEditMode ? this.props.sets : <input type="text" className={"exerciseSetsInput-" + this.state.exerciseId} placeholder={this.props.sets} />}</div>
+                    <div className="exerciseReps">Reps: {!this.state.exerEditMode ? this.props.reps : <input type="text" className={"exerciseRepsInput-" + this.state.exerciseId} placeholder={this.props.reps} />}</div>
+                    <div className="exerciseWeight">Weight: {!this.state.exerEditMode ? this.props.weight : <input type="text" className={"exerciseWeightInput-" + this.state.exerciseId} placeholder={this.props.weight} />}</div>
                 </div>
                 {/* Row of buttons */}
                 <div className="row">
@@ -47,7 +47,7 @@ class Exercise extends Component {
                             data-direction="up"
                             data-exerciseid={this.state.exerciseId}
                             className="exerBtn btn btn-warning"
-                            onClick={!this.state.isEditMode ? this.props.moveExercise : null}>
+                            onClick={!this.state.exerEditMode ? this.props.moveExercise : null}>
                             <i data-direction="up"
                                 data-exerciseid={this.state.exerciseId}
                                 className="bi bi-arrow-up-square">
@@ -58,25 +58,26 @@ class Exercise extends Component {
                             data-direction="down"
                             data-exerciseid={this.state.exerciseId}
                             className="exerBtn btn btn-warning"
-                            onClick={!this.state.isEditMode ? this.props.moveExercise : null}>
+                            onClick={!this.state.exerEditMode ? this.props.moveExercise : null}>
                             <i data-direction="down"
                                 data-exerciseid={this.state.exerciseId}
                                 className="bi bi-arrow-down-square">
                             </i>
                         </button>
-                        {/* Edit button, turns to save button, when save is pushed toggled isEditMode in exercise state and uses 'updateExerciseInfo' function passed down from Board to perform state change */}
-                        {!this.state.isEditMode ? <button type="button" className="exerBtn btn btn-secondary" onClick={this.toggleEditMode}>Edit</button> :
-                            <button type="button" className="exerBtn btn btn-success" onClick={event => {this.toggleEditMode(); this.props.updateExerciseInfo();}}>Save</button>}
+                        {/* Edit button, turns to save button, when save is pushed toggled exerEditMode in exercise state and uses 'updateExerciseInfo' function passed down from Board to perform state change */}
+                        {/* only toggle board and exercise edit mode if another exercise is not in edit mode (determine this by checking if boardEditMode is false in edit mode button onClick) */}
+                        {!this.state.exerEditMode ? <button type="button" className="exerBtn btn btn-secondary" onClick={!this.props.boardEditMode ? event => { this.toggleEditMode(); this.props.toggleBoardEditMode(); } : null}>Edit</button> :
+                            <button type="button" className="exerBtn btn btn-success" data-exerciseid={this.state.exerciseId} onClick={event => { this.props.updateExerciseInfo(event); this.toggleEditMode(); this.props.toggleBoardEditMode(); }}>Save</button>}
                         {/* Done button */}
-                        {!this.state.isEditMode ? 
-                        <button type="button"
-                            data-direction="done"
-                            data-exerciseid={this.state.exerciseId}
-                            className="exerBtn btn btn-primary"
-                            onClick={this.props.moveExercise}>
-                            Done
-                        </button>:
-                        <button type="button" className="exerBtn btn btn-danger" onClick={this.toggleEditMode}>Cancel</button>
+                        {!this.state.exerEditMode ?
+                            <button type="button"
+                                data-direction="done"
+                                data-exerciseid={this.state.exerciseId}
+                                className="exerBtn btn btn-primary"
+                                onClick={this.props.moveExercise}>
+                                Done
+                        </button> :
+                            <button type="button" className="exerBtn btn btn-danger" onClick={event => { this.toggleEditMode(); this.props.toggleBoardEditMode(); }}>Cancel</button>
                         }
                     </div>
                 </div>
