@@ -12,19 +12,17 @@
     text-align: center;
 }
 
-/* .exerEditButton{
-    margin: 1px;
-    margin-left: 50px;
-}
-
-.exerDoneButton{
-    float: right;
-    margin: 1px;
-    margin-right: 50px;    
-} */
-
 .exerBtn{
     position: relative;
-    max-width: 25%;
-    margin-right: 5%;
+    max-width: 30%;
+    margin-left: 2.5%;
+}
+
+.deleteBtn{
+    width: 75%;
+    max-width: 80px;
+    margin: auto;
+    position: relative;
+    top: 25%;
+    left: 12.5%;
 }

@@ -4,6 +4,8 @@ import "./css/Exercise.css"
 class Exercise extends Component {
     constructor(props) {
         super(props);
+        // using props for things that displayed (sets/reps/name/weight) so that they update when the Board state changes
+        // only using exercise state for Id (doesn't change) and exerEditMode (needs to be handled in exercise component)
         this.state = {
             /*{name: (props.name ? props.name : "-"),
             sets: (props.sets ? props.sets : "-"),
@@ -35,9 +37,14 @@ class Exercise extends Component {
                 </div>
                 {/* Reps, sets, and weight */}
                 <div className="row">
-                    <div className="exerciseSets">Sets: {!this.state.exerEditMode ? this.props.sets : <input type="text" className={"exerciseSetsInput-" + this.state.exerciseId} placeholder={this.props.sets} />}</div>
-                    <div className="exerciseReps">Reps: {!this.state.exerEditMode ? this.props.reps : <input type="text" className={"exerciseRepsInput-" + this.state.exerciseId} placeholder={this.props.reps} />}</div>
-                    <div className="exerciseWeight">Weight: {!this.state.exerEditMode ? this.props.weight : <input type="text" className={"exerciseWeightInput-" + this.state.exerciseId} placeholder={this.props.weight} />}</div>
+                    <div className="col">
+                        <div className="exerciseSets">Sets: {!this.state.exerEditMode ? this.props.sets : <input type="text" size="4" className={"exerciseSetsInput-" + this.state.exerciseId} placeholder={this.props.sets} />}</div>
+                        <div className="exerciseReps">Reps: {!this.state.exerEditMode ? this.props.reps : <input type="text" size="4" className={"exerciseRepsInput-" + this.state.exerciseId} placeholder={this.props.reps} />}</div>
+                        <div className="exerciseWeight">Weight: {!this.state.exerEditMode ? this.props.weight : <input type="text" size="4" className={"exerciseWeightInput-" + this.state.exerciseId} placeholder={this.props.weight} />}</div>
+                    </div>
+                    <div className="col">
+                        {!this.state.exerEditMode ? null : <button type="button" className="deleteBtn btn btn-dark">Delete</button>}
+                    </div>
                 </div>
                 {/* Row of buttons */}
                 <div className="row">
