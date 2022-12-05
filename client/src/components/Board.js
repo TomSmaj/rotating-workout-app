@@ -156,11 +156,12 @@ class Board extends Component {
                                 sets={exercise.sets}
                                 reps={exercise.reps}
                                 weight={exercise.weight}
+                                category={exercise.category}
                                 exerciseId={exercisePosition}
                                 moveExercise={this.moveExercise}
                                 updateExerciseInfo={this.updateExerciseInfo}
                                 toggleBoardEditMode={this.toggleBoardEditMode}
-                                boardEditMode={this.state.boardEditMode}
+                                boardEditMode={this.state.boardEditMode}                                
                                 key={exercisePosition} />
                         </div>
                     )
