@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import "./css/Exercise.css"
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Modal';
 
 class Exercise extends Component {
     constructor(props) {
@@ -12,9 +14,11 @@ class Exercise extends Component {
             reps: (props.reps ? props.reps : "-"),
             weight: (props.weight ? props.weight : "-"),*/
             exerciseId: props.exerciseId,
-            exerEditMode: false
+            exerEditMode: false,
+            showDelete: false
         }
         this.toggleEditMode = this.toggleEditMode.bind(this);
+        this.toggleShowDelete = this.toggleShowDelete.bind(this);
     }
 
     componentDidMount() {
@@ -23,6 +27,10 @@ class Exercise extends Component {
 
     toggleEditMode = () => {
         this.setState({ exerEditMode: !this.state.exerEditMode });
+    }
+
+    toggleShowDelete = () => {
+        this.setState({ showDelete: !this.state.showDelete });
     }
 
     render() {
@@ -43,7 +51,7 @@ class Exercise extends Component {
                         <div className="exerciseWeight">Weight: {!this.state.exerEditMode ? this.props.weight : <input type="text" size="4" className={"exerciseWeightInput-" + this.state.exerciseId} placeholder={this.props.weight} />}</div>
                     </div>
                     <div className="col">
-                        {!this.state.exerEditMode ? null : <button type="button" className="deleteBtn btn btn-dark">Delete</button>}
+                        {!this.state.exerEditMode ? null : <button type="button" className="deleteBtn btn btn-dark" onClick={this.toggleShowDelete}>Delete</button>}
                     </div>
                 </div>
                 {/* Row of buttons */}
@@ -88,6 +96,15 @@ class Exercise extends Component {
                         }
                     </div>
                 </div>
+                <Modal className="deleteModal" show={this.state.showDelete}>
+                    <Modal.Header>
+                        <Modal.Title>Delete Exercise?</Modal.Title>
+                    </Modal.Header>                    
+                    <Modal.Footer>
+                    <button type="button" className="btn btn-danger" data-delete="true" data-exerciseid={this.state.exerciseId} onClick={event => {this.toggleShowDelete(); this.props.updateExerciseInfo(event); this.props.toggleBoardEditMode();}}>Delete</button>
+                    <button type="button" className="btn btn-secondary" onClick={this.toggleShowDelete}>Cancel</button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         )
     }

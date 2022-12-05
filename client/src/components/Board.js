@@ -108,22 +108,34 @@ class Board extends Component {
     }
 
     updateExerciseInfo = (event) => {
-        console.log("updatedExerciseInfo reached");
+        let isDelete = event.target.dataset.delete;
         let exerciseId = event.target.dataset.exerciseid;
-        let newExerciseName = document.getElementsByClassName("exerciseNameInput-" + exerciseId)[0].value;
-        let newExerciseSets = document.getElementsByClassName("exerciseSetsInput-" + exerciseId)[0].value;
-        let newExerciseReps = document.getElementsByClassName("exerciseRepsInput-" + exerciseId)[0].value;  
-        let newExerciseWeight = document.getElementsByClassName("exerciseWeightInput-" + exerciseId)[0].value;
-        console.log(this.state.exerciseData[exerciseId]);
-        let tempNewExerciseObj = {
-            name: (newExerciseName !== ""  && newExerciseName !== null ? newExerciseName : this.state.exerciseData[exerciseId].name),
-            sets: (newExerciseSets !== ""  && newExerciseSets !== null ? parseInt(newExerciseSets) : this.state.exerciseData[exerciseId].sets),
-            reps: (newExerciseReps !== ""  && newExerciseReps !== null ? parseInt(newExerciseReps) : this.state.exerciseData[exerciseId].reps),            
-            weight: (newExerciseWeight !== ""  && newExerciseWeight !== null ? parseInt(newExerciseWeight) : this.state.exerciseData[exerciseId].weight)
-        }
         let tempExerciseData = this.state.exerciseData;
-        tempExerciseData[exerciseId.toString()] = tempNewExerciseObj;
-        this.setState({exerciseData: tempExerciseData});        
+        // check if the update for is for deleting exercise
+        console.log("updatedExerciseInfo reached");
+        if (isDelete) {
+            // create temp variables or data and info, remove the related info and order for exerciseId being deleted, set temps with exercise removed to state
+            let tempOrder = this.state.exerciseOrder;
+            let deleteOrderIndex = tempOrder.indexOf(parseInt(exerciseId));
+            delete tempExerciseData[exerciseId];
+            tempOrder.splice(deleteOrderIndex, 1);
+            this.setState({exerciseData: tempExerciseData});
+            this.setState({exerciseOrder: tempOrder});
+        }
+        else {
+            let newExerciseName = document.getElementsByClassName("exerciseNameInput-" + exerciseId)[0].value;
+            let newExerciseSets = document.getElementsByClassName("exerciseSetsInput-" + exerciseId)[0].value;
+            let newExerciseReps = document.getElementsByClassName("exerciseRepsInput-" + exerciseId)[0].value;
+            let newExerciseWeight = document.getElementsByClassName("exerciseWeightInput-" + exerciseId)[0].value;
+            let tempNewExerciseObj = {
+                name: (newExerciseName !== "" && newExerciseName !== null ? newExerciseName : this.state.exerciseData[exerciseId].name),
+                sets: (newExerciseSets !== "" && newExerciseSets !== null ? parseInt(newExerciseSets) : this.state.exerciseData[exerciseId].sets),
+                reps: (newExerciseReps !== "" && newExerciseReps !== null ? parseInt(newExerciseReps) : this.state.exerciseData[exerciseId].reps),
+                weight: (newExerciseWeight !== "" && newExerciseWeight !== null ? parseInt(newExerciseWeight) : this.state.exerciseData[exerciseId].weight)
+            }
+            tempExerciseData[exerciseId.toString()] = tempNewExerciseObj;
+            this.setState({ exerciseData: tempExerciseData });
+        }
     }
 
     toggleBoardEditMode = () => {

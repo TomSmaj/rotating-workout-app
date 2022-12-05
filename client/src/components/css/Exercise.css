@@ -26,3 +26,8 @@
     top: 25%;
     left: 12.5%;
 }
+
+.deleteModal{
+    position: relative;
+    top: 300px;
+}
