@@ -37,13 +37,46 @@ class Board extends Component {
         }))
     }
 
-    // this function is passed down to exercise components via props
-    // direction to move and the ID (index in order array) of exercise is taken from data attributes on target that is clicked
 
-    addExercise = () => {
-        console.log("addExercise reached");
+    addExercise = () => {        
+        
+        // get values from add exercise modal
+        let addExerciseName = document.getElementsByClassName("addExerciseNameInput")[0].value;
+        let addExerciseSets = parseInt(document.getElementsByClassName("addExerciseSetsInput")[0].value);
+        let addExerciseReps = parseInt(document.getElementsByClassName("addExerciseRepsInput")[0].value);
+        let addExerciseWeight = parseInt(document.getElementsByClassName("addExerciseWeightInput")[0].value);
+        let addExerciseCategory = document.getElementsByClassName("addExerciseCategoryInput")[0].value;
+
+        // increment the Id from most recent Id variable, since the most recent one is the last one in use
+        let newExerciseId = this.state.mostRecentId + 1;
+
+        // put new values in object
+        let newExercise = {
+            "name": addExerciseName,
+            "sets": addExerciseSets,
+            "reps": addExerciseReps,
+            "weight": addExerciseWeight,
+            "category": addExerciseCategory
+        };
+
+        // create a temporary variable to hold all exercise data, then add newExercise with the newExerciseId as the field
+        let tempExerciseData = this.state.exerciseData;
+        tempExerciseData[String(newExerciseId)] = newExercise;
+
+        // create a temporary variable to hold exercise order, add new exercise to end
+        let tempExerciseOrder = this.state.exerciseOrder;
+        tempExerciseOrder.push(newExerciseId);
+
+        // set the state values to the temp variables (which have the new exercise added)
+        this.setState({exerciseData: tempExerciseData});
+        this.setState({exerciseOrder: tempExerciseOrder});
+
+        // update the most recent exercise Id
+        this.setState({mostRecentId: newExerciseId});
     }
 
+    // this function is passed down to exercise components via props
+    // direction to move and the ID (index in order array) of exercise is taken from data attributes on target that is clicked
     moveExercise = (event) => {
         // do not allow a an exercise to be moved if boardEditMode is true (which should only be true when one exercise edit mode is true)
         if (!this.state.boardEditMode) {
@@ -123,19 +156,22 @@ class Board extends Component {
         }
     }
 
+    // turns edit mode on and off at board level. When true, no buttons can be moved and no other edit modes can be started
     toggleBoardEditMode = () => {
         this.setState({ boardEditMode: !this.state.boardEditMode });
     }
 
+    // shows add exercise modal when true (is toggled by add exercise button)
     toggleShowAddExercise = () => {
         this.setState({ showAddExercise: !this.state.showAddExercise });
     }
 
+    // passed into each exercise component via props, is accessed by edit mode save button
     updateExerciseInfo = (event) => {
         let isDelete = event.target.dataset.delete;
         let exerciseId = event.target.dataset.exerciseid;
         let tempExerciseData = this.state.exerciseData;
-        // check if the update for is for deleting exercise
+        // check if the update is for deleting exercise
         console.log("updatedExerciseInfo reached");
         if (isDelete) {
             // create temp variables or data and info, remove the related info and order for exerciseId being deleted, set temps with exercise removed to state
@@ -195,31 +231,31 @@ class Board extends Component {
                         <div className="addExercise col-9">
                             {/* Exercise Name */}
                             <div className="row">
-                                <span> Name: <input type="text" className={"addExerciseInput"} /></span>
+                                <span> Name: <input type="text" className={"addExerciseNameInput"} /></span>
                             </div>
                             {/* Reps, sets, and weight */}
                             <div className="row">
                                 <div className="col">
-                                <div className="row">
-                                    <span> Sets:  <input type="text" size="4" className={"addExerciseSetsInput"} /></span>
+                                    <div className="row">
+                                        <span> Sets:  <input type="text" size="4" className={"addExerciseSetsInput"} /></span>
                                     </div>
                                     <div className="row">
-                                    <span> Reps:  <input type="text" size="4" className={"addExerciseRepsInput"} /></span>
+                                        <span> Reps:  <input type="text" size="4" className={"addExerciseRepsInput"} /></span>
                                     </div>
                                     <div className="row">
-                                    <span> Weight:  <input type="text" size="4" className={"addExerciseWeightInput"} /></span>
+                                        <span> Weight:  <input type="text" size="4" className={"addExerciseWeightInput"} /></span>
                                     </div>
                                     <div className="row">
-                                    <span> Category: <select className="addExerciseCategoryInput" name="Category">
-                                    <option value="blank"></option>
-                                        <option value="arm">Arm</option>
-                                        <option value="back">Back</option>
-                                        <option value="cardio">Cardio</option>
-                                        <option value="chest">Chest</option>
-                                        <option value="core">Core</option>
-                                        <option value="leg">Leg</option>
-                                        <option value="other">Other</option>                                        
-                                    </select> </span>
+                                        <span> Category: <select className="addExerciseCategoryInput" name="Category">
+                                            <option value="blank"></option>
+                                            <option value="arm">Arm</option>
+                                            <option value="back">Back</option>
+                                            <option value="cardio">Cardio</option>
+                                            <option value="chest">Chest</option>
+                                            <option value="core">Core</option>
+                                            <option value="leg">Leg</option>
+                                            <option value="other">Other</option>
+                                        </select> </span>
                                     </div>
                                 </div>
                             </div>
