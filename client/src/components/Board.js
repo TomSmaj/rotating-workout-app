@@ -2,32 +2,48 @@ import React, { Component } from 'react';
 import $ from 'jquery';
 import Exercise from './Exercise';
 import "./css/Board.css"
+import Modal from 'react-bootstrap/Modal';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 class Board extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            boardEditMode: false,
             exerciseData: {},
             exerciseOrder: [],
-            boardEditMode: false
+            mostRecentId: 0,
+            showAddExercise: false
         }
+
+        this.addExercise = this.addExercise.bind(this);
         this.moveExercise = this.moveExercise.bind(this);
-        this.updateExerciseInfo = this.updateExerciseInfo.bind(this);
         this.toggleBoardEditMode = this.toggleBoardEditMode.bind(this);
+        this.toggleShowAddExercise = this.toggleShowAddExercise.bind(this);
+        this.updateExerciseInfo = this.updateExerciseInfo.bind(this);
     }
 
     componentDidMount() {
         console.log("Component Did Mount, getting Data")
         $.get("/get-exercise-data").then(res => {
             this.setState({ exerciseData: res });
+            // console.log("Exercise data API request complete");
         }).then($.get("/get-exercise-order").then(res => {
             this.setState({ exerciseOrder: res.order });
-            console.log("Data request complete");
+            // console.log("Order API request complete");
+        })).then($.get("/get-most-recent-id").then(res => {
+            this.setState({ mostRecentId: res.mostRecentId });
+            // console.log("Most recent id API request complete");
         }))
     }
 
     // this function is passed down to exercise components via props
     // direction to move and the ID (index in order array) of exercise is taken from data attributes on target that is clicked
+
+    addExercise = () => {
+        console.log("addExercise reached");
+    }
+
     moveExercise = (event) => {
         // do not allow a an exercise to be moved if boardEditMode is true (which should only be true when one exercise edit mode is true)
         if (!this.state.boardEditMode) {
@@ -107,6 +123,14 @@ class Board extends Component {
         }
     }
 
+    toggleBoardEditMode = () => {
+        this.setState({ boardEditMode: !this.state.boardEditMode });
+    }
+
+    toggleShowAddExercise = () => {
+        this.setState({ showAddExercise: !this.state.showAddExercise });
+    }
+
     updateExerciseInfo = (event) => {
         let isDelete = event.target.dataset.delete;
         let exerciseId = event.target.dataset.exerciseid;
@@ -119,8 +143,8 @@ class Board extends Component {
             let deleteOrderIndex = tempOrder.indexOf(parseInt(exerciseId));
             delete tempExerciseData[exerciseId];
             tempOrder.splice(deleteOrderIndex, 1);
-            this.setState({exerciseData: tempExerciseData});
-            this.setState({exerciseOrder: tempOrder});
+            this.setState({ exerciseData: tempExerciseData });
+            this.setState({ exerciseOrder: tempOrder });
         }
         else {
             let newExerciseName = document.getElementsByClassName("exerciseNameInput-" + exerciseId)[0].value;
@@ -138,15 +162,11 @@ class Board extends Component {
         }
     }
 
-    toggleBoardEditMode = () => {
-        this.setState({ boardEditMode: !this.state.boardEditMode });
-    }
-
     render() {
         return (
             <div className="exerciseBoard container">
                 <div className="row">
-                    <button type="button" className="btn btn-danger exerAddButton col-9">Add Exercise</button>
+                    <button type="button" className="btn btn-danger exerAddButton col-9" onClick={this.toggleShowAddExercise}>Add Exercise</button>
                 </div>
                 {this.state.exerciseOrder.map(exercisePosition => {
                     let exercise = this.state.exerciseData[exercisePosition];
@@ -161,12 +181,55 @@ class Board extends Component {
                                 moveExercise={this.moveExercise}
                                 updateExerciseInfo={this.updateExerciseInfo}
                                 toggleBoardEditMode={this.toggleBoardEditMode}
-                                boardEditMode={this.state.boardEditMode}                                
+                                boardEditMode={this.state.boardEditMode}
                                 key={exercisePosition} />
                         </div>
                     )
                 })
                 }
+                <Modal className="addExerciseModal" show={this.state.showAddExercise}>
+                    <Modal.Header>
+                        <Modal.Title>Add Exercise</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className="addExercise col-9">
+                            {/* Exercise Name */}
+                            <div className="row">
+                                <span> Name: <input type="text" className={"addExerciseInput"} /></span>
+                            </div>
+                            {/* Reps, sets, and weight */}
+                            <div className="row">
+                                <div className="col">
+                                <div className="row">
+                                    <span> Sets:  <input type="text" size="4" className={"addExerciseSetsInput"} /></span>
+                                    </div>
+                                    <div className="row">
+                                    <span> Reps:  <input type="text" size="4" className={"addExerciseRepsInput"} /></span>
+                                    </div>
+                                    <div className="row">
+                                    <span> Weight:  <input type="text" size="4" className={"addExerciseWeightInput"} /></span>
+                                    </div>
+                                    <div className="row">
+                                    <span> Category: <select className="addExerciseCategoryInput" name="Category">
+                                    <option value="blank"></option>
+                                        <option value="arm">Arm</option>
+                                        <option value="back">Back</option>
+                                        <option value="cardio">Cardio</option>
+                                        <option value="chest">Chest</option>
+                                        <option value="core">Core</option>
+                                        <option value="leg">Leg</option>
+                                        <option value="other">Other</option>                                        
+                                    </select> </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <button type="button" className="btn btn-success" onClick={event => { this.toggleShowAddExercise(); this.addExercise(); }}>Add</button>
+                        <button type="button" className="btn btn-danger" onClick={this.toggleShowAddExercise}>Cancel</button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         )
     }

@@ -99,10 +99,10 @@ class Exercise extends Component {
                 <Modal className="deleteModal" show={this.state.showDelete}>
                     <Modal.Header>
                         <Modal.Title>Delete Exercise?</Modal.Title>
-                    </Modal.Header>                    
+                    </Modal.Header>
                     <Modal.Footer>
-                    <button type="button" className="btn btn-danger" data-delete="true" data-exerciseid={this.state.exerciseId} onClick={event => {this.toggleShowDelete(); this.props.updateExerciseInfo(event); this.props.toggleBoardEditMode();}}>Delete</button>
-                    <button type="button" className="btn btn-secondary" onClick={this.toggleShowDelete}>Cancel</button>
+                        <button type="button" className="btn btn-danger" data-delete="true" data-exerciseid={this.state.exerciseId} onClick={event => { this.toggleShowDelete(); this.props.updateExerciseInfo(event); this.props.toggleBoardEditMode(); }}>Delete</button>
+                        <button type="button" className="btn btn-secondary" onClick={this.toggleShowDelete}>Cancel</button>
                     </Modal.Footer>
                 </Modal>
             </div>
