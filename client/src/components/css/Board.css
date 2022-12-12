@@ -1,9 +1,15 @@
 .exerciseBoard{
-    width: 100%;
+    width: 375px;
     height: 1000px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .exerAddButton{
     margin-left: auto;
     margin-right: auto;
+}
+
+.addExerciseErrorMessage{
+    color: red;
 }
