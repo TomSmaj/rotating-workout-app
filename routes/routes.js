@@ -24,4 +24,18 @@ module.exports = function (app) {
             }
         })        
     })
+
+    app.get("/get-most-recent-id", (req, res) => {        
+        fs.readFile('./data/mostRecentId.json', 'utf8', (err, jsonString) => {
+            if (err) {
+                return;
+            }
+            try {
+                const mostRecentId = JSON.parse(jsonString);
+                res.status(200).send(mostRecentId);
+            } catch (err) {
+                console.log('Error parsing JSON string:', err);
+            }
+        })        
+    })
 }

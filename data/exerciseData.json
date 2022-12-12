@@ -3,72 +3,91 @@
         "name": "Spread Overhand Pullups",
         "sets": 3,
         "reps": 12,
-        "weight": null
+        "weight": null,
+        "category": "back"
     },
     "1": {
         "name": "Close Overhand Pullups",
         "sets": 3,
         "reps": 12,
-        "weight": null
+        "weight": null,
+        "category": "back"
     },
     "2": {
         "name": "Underhand Pullups",
         "sets": 3,
         "reps": 12,
-        "weight": null
+        "weight": null,
+        "category": "arm"
     },
     "3": {
         "name": "Bicep Curls",
         "sets": 4,
         "reps": 8,
-        "weight": 40
+        "weight": 40,
+        "category": "arm"
     },
     "4": {
         "name": "Tricep Press",
         "sets": 3,
         "reps": 12,
-        "weight": 55
+        "weight": 55,
+        "category": "arm"
     },
     "5": {
         "name": "Bench Press",
         "sets": 3,
         "reps": 12,
-        "weight": 140
+        "weight": 140,
+        "category": "chest"
     },
     "6": {
         "name": "Dumbbell Flies",
         "sets": 3,
         "reps": 12,
-        "weight": 55
+        "weight": 55,
+        "category": "chest"
     },
     "7": {
         "name": "Inclined Dumbbell Bench",
         "sets": 3,
         "reps": 12,
-        "weight": 55
+        "weight": 55,
+        "category": "chest"
     },
     "8": {
         "name": "Reverse Flies",
         "sets": 3,
         "reps": 15,
-        "weight": 20
+        "weight": 20,
+        "category": "back"
     },
     "9": {
         "name": "Dead Lifts",
         "sets": 3,
         "reps": 12,
-        "weight": 140
+        "weight": 140,
+        "category": "back"
     },
     "10": {
         "name": "Linear Leg Press",
         "sets": 3,
         "reps": 12,
-        "weight": 230
+        "weight": 230,
+        "category": "leg"
     },
     "11": {
+        "name": "Shoulders",
+        "sets": 3,
+        "reps": 12,
+        "weight": 20,
+        "category": "arms"
+    },
+    "12": {
         "name": "Weighted Twist Situps",
         "sets": 3,
         "reps": 15,
-        "weight": 16
+        "weight": 16,
+        "category": "core"
     }
 }

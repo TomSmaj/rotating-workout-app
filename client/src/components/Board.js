@@ -2,28 +2,92 @@ import React, { Component } from 'react';
 import $ from 'jquery';
 import Exercise from './Exercise';
 import "./css/Board.css"
+import Modal from 'react-bootstrap/Modal';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 class Board extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            boardEditMode: false,
             exerciseData: {},
             exerciseOrder: [],
-            boardEditMode: false
+            mostRecentId: 0,
+            showAddExercise: false
         }
+
+        this.addExercise = this.addExercise.bind(this);
         this.moveExercise = this.moveExercise.bind(this);
-        this.updateExerciseInfo = this.updateExerciseInfo.bind(this);
         this.toggleBoardEditMode = this.toggleBoardEditMode.bind(this);
+        this.toggleShowAddExercise = this.toggleShowAddExercise.bind(this);
+        this.updateExerciseInfo = this.updateExerciseInfo.bind(this);
     }
 
     componentDidMount() {
         console.log("Component Did Mount, getting Data")
         $.get("/get-exercise-data").then(res => {
             this.setState({ exerciseData: res });
+            // console.log("Exercise data API request complete");
         }).then($.get("/get-exercise-order").then(res => {
             this.setState({ exerciseOrder: res.order });
-            console.log("Data request complete");
+            // console.log("Order API request complete");
+        })).then($.get("/get-most-recent-id").then(res => {
+            this.setState({ mostRecentId: res.mostRecentId });
+            // console.log("Most recent id API request complete");
         }))
+    }
+
+
+    addExercise = () => {
+
+        // get values from add exercise modal
+        let addExerciseName = document.getElementsByClassName("addExerciseNameInput")[0].value;
+        let addExerciseSets = parseInt(document.getElementsByClassName("addExerciseSetsInput")[0].value);
+        let addExerciseReps = parseInt(document.getElementsByClassName("addExerciseRepsInput")[0].value);
+        let addExerciseWeight = parseInt(document.getElementsByClassName("addExerciseWeightInput")[0].value);
+        let addExerciseCategory = document.getElementsByClassName("addExerciseCategoryInput")[0].value;
+
+        // check to see if name is a string, the number values are infact numbers, and the blank dropdown option was not chosen
+        let isNameValid = typeof addExerciseName === 'string';
+        let isSetsValid = !isNaN(addExerciseSets);
+        let isRepsValid = !isNaN(addExerciseReps);
+        let isWeightValid = !isNaN(addExerciseWeight);
+        let isCategoryValid = addExerciseCategory !== "blank";
+
+        // perform exercise addition if all above 5 varaible are true
+        if (isNameValid && isSetsValid && isRepsValid && isWeightValid && isCategoryValid) {
+            // increment the Id from most recent Id variable, since the most recent one is the last one in use
+            let newExerciseId = this.state.mostRecentId + 1;
+
+            // put new values in object
+            let newExercise = {
+                "name": addExerciseName,
+                "sets": addExerciseSets,
+                "reps": addExerciseReps,
+                "weight": addExerciseWeight,
+                "category": addExerciseCategory
+            };
+
+            // create a temporary variable to hold all exercise data, then add newExercise with the newExerciseId as the field
+            let tempExerciseData = this.state.exerciseData;
+            tempExerciseData[String(newExerciseId)] = newExercise;
+
+            // create a temporary variable to hold exercise order, add new exercise to end
+            let tempExerciseOrder = this.state.exerciseOrder;
+            tempExerciseOrder.push(newExerciseId);
+
+            // set the state values to the temp variables (which have the new exercise added)
+            this.setState({ exerciseData: tempExerciseData });
+            this.setState({ exerciseOrder: tempExerciseOrder });
+
+            // update the most recent exercise Id
+            this.setState({ mostRecentId: newExerciseId });
+
+            this.toggleShowAddExercise();
+        }
+        else{
+            document.getElementsByClassName("addExerciseErrorMessage")[0].innerHTML = "Invalid input";
+        }
     }
 
     // this function is passed down to exercise components via props
@@ -107,11 +171,24 @@ class Board extends Component {
         }
     }
 
+    // turns edit mode on and off at board level. When true, no buttons can be moved and no other edit modes can be started
+    toggleBoardEditMode = () => {
+        this.setState({ boardEditMode: !this.state.boardEditMode });
+    }
+
+    // shows add exercise modal when true (is toggled by add exercise button)
+    toggleShowAddExercise = () => {
+        if (!this.state.boardEditMode) {
+            this.setState({ showAddExercise: !this.state.showAddExercise });
+        }
+    }
+
+    // passed into each exercise component via props, is accessed by edit mode save button
     updateExerciseInfo = (event) => {
         let isDelete = event.target.dataset.delete;
         let exerciseId = event.target.dataset.exerciseid;
         let tempExerciseData = this.state.exerciseData;
-        // check if the update for is for deleting exercise
+        // check if the update is for deleting exercise
         console.log("updatedExerciseInfo reached");
         if (isDelete) {
             // create temp variables or data and info, remove the related info and order for exerciseId being deleted, set temps with exercise removed to state
@@ -119,8 +196,8 @@ class Board extends Component {
             let deleteOrderIndex = tempOrder.indexOf(parseInt(exerciseId));
             delete tempExerciseData[exerciseId];
             tempOrder.splice(deleteOrderIndex, 1);
-            this.setState({exerciseData: tempExerciseData});
-            this.setState({exerciseOrder: tempOrder});
+            this.setState({ exerciseData: tempExerciseData });
+            this.setState({ exerciseOrder: tempOrder });
         }
         else {
             let newExerciseName = document.getElementsByClassName("exerciseNameInput-" + exerciseId)[0].value;
@@ -138,35 +215,79 @@ class Board extends Component {
         }
     }
 
-    toggleBoardEditMode = () => {
-        this.setState({ boardEditMode: !this.state.boardEditMode });
-    }
-
     render() {
         return (
-            <div className="exerciseBoard container">
-                <div className="row">
-                    <button type="button" className="btn btn-danger exerAddButton col-9">Add Exercise</button>
+            <div className="exerciseBoard">
+                <div className="container">
+                    <div className="row">
+                        <button type="button" className="btn btn-danger exerAddButton col-9" onClick={this.toggleShowAddExercise}>Add Exercise</button>
+                    </div>
+                    {this.state.exerciseOrder.map(exercisePosition => {
+                        let exercise = this.state.exerciseData[exercisePosition];
+                        return (
+                            <div className="row">
+                                <Exercise name={exercise.name}
+                                    sets={exercise.sets}
+                                    reps={exercise.reps}
+                                    weight={exercise.weight}
+                                    category={exercise.category}
+                                    exerciseId={exercisePosition}
+                                    moveExercise={this.moveExercise}
+                                    updateExerciseInfo={this.updateExerciseInfo}
+                                    toggleBoardEditMode={this.toggleBoardEditMode}
+                                    boardEditMode={this.state.boardEditMode}
+                                    key={exercisePosition} />
+                            </div>
+                        )
+                    })
+                    }
+                    <Modal className="addExerciseModal" show={this.state.showAddExercise}>
+                        <Modal.Header>
+                            <Modal.Title>Add Exercise</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div className="addExercise col-9">
+                                {/* Exercise Name */}
+                                <div className="row">
+                                    <span> Name: <input type="text" className={"addExerciseNameInput"} /></span>
+                                </div>
+                                {/* Reps, sets, and weight */}
+                                <div className="row">
+                                    <div className="col">
+                                        <div className="row">
+                                            <span> Sets:  <input type="text" size="4" className={"addExerciseSetsInput"} /></span>
+                                        </div>
+                                        <div className="row">
+                                            <span> Reps:  <input type="text" size="4" className={"addExerciseRepsInput"} /></span>
+                                        </div>
+                                        <div className="row">
+                                            <span> Weight:  <input type="text" size="4" className={"addExerciseWeightInput"} /></span>
+                                        </div>
+                                        <div className="row">
+                                            <span> Category: <select className="addExerciseCategoryInput" name="Category">
+                                                <option value="blank"></option>
+                                                <option value="arm">Arm</option>
+                                                <option value="back">Back</option>
+                                                <option value="cardio">Cardio</option>
+                                                <option value="chest">Chest</option>
+                                                <option value="core">Core</option>
+                                                <option value="leg">Leg</option>
+                                                <option value="other">Other</option>
+                                            </select> </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className = "row addExerciseErrorMessage">
+                                    
+                                </div>
+                            </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <button type="button" className="btn btn-success" onClick={this.addExercise}>Add</button>
+                            <button type="button" className="btn btn-danger" onClick={this.toggleShowAddExercise}>Cancel</button>
+                        </Modal.Footer>
+                    </Modal>
                 </div>
-                {this.state.exerciseOrder.map(exercisePosition => {
-                    let exercise = this.state.exerciseData[exercisePosition];
-                    return (
-                        <div className="row">
-                            <Exercise name={exercise.name}
-                                sets={exercise.sets}
-                                reps={exercise.reps}
-                                weight={exercise.weight}
-                                category={exercise.category}
-                                exerciseId={exercisePosition}
-                                moveExercise={this.moveExercise}
-                                updateExerciseInfo={this.updateExerciseInfo}
-                                toggleBoardEditMode={this.toggleBoardEditMode}
-                                boardEditMode={this.state.boardEditMode}                                
-                                key={exercisePosition} />
-                        </div>
-                    )
-                })
-                }
             </div>
         )
     }
