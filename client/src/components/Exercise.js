@@ -8,17 +8,14 @@ class Exercise extends Component {
         super(props);
         // using props for things that displayed (sets/reps/name/weight) so that they update when the Board state changes
         // only using exercise state for Id (doesn't change) and exerEditMode (needs to be handled in exercise component)
-        this.state = {
-            /*{name: (props.name ? props.name : "-"),
-            sets: (props.sets ? props.sets : "-"),
-            reps: (props.reps ? props.reps : "-"),
-            weight: (props.weight ? props.weight : "-"),*/
+        this.state = {            
             exerciseId: props.exerciseId,
             exerEditMode: false,
             showDelete: false
         }
         this.toggleEditMode = this.toggleEditMode.bind(this);
         this.toggleShowDelete = this.toggleShowDelete.bind(this);
+        this.validateEditInfo = this.validateEditInfo.bind(this);
     }
 
     componentDidMount() {
@@ -31,6 +28,37 @@ class Exercise extends Component {
 
     toggleShowDelete = () => {
         this.setState({ showDelete: !this.state.showDelete });
+    }
+
+    validateEditInfo = (event) => {
+        let isDelete = event.target.dataset.delete;
+        let exerciseId = event.target.dataset.exerciseid;
+
+        if (isDelete) {
+            this.props.updateExerciseInfo(event);
+            this.toggleEditMode();
+            this.props.toggleBoardEditMode();
+        }
+        else {
+            let newExerciseSets = document.getElementsByClassName("exerciseSetsInput-" + exerciseId)[0].value;
+            let newExerciseReps = document.getElementsByClassName("exerciseRepsInput-" + exerciseId)[0].value;
+            let newExerciseWeight = document.getElementsByClassName("exerciseWeightInput-" + exerciseId)[0].value;
+
+            let isSetsValid = !isNaN(newExerciseSets);
+            let isRepsValid = !isNaN(newExerciseReps);
+            let isWeightValid = !isNaN(newExerciseWeight);
+
+            if (isSetsValid && isRepsValid && isWeightValid) {
+                this.props.updateExerciseInfo(event);
+                this.toggleEditMode();
+                this.props.toggleBoardEditMode();
+            }
+            else{
+                return;
+            }
+
+        }
+
     }
 
     render() {
@@ -79,11 +107,11 @@ class Exercise extends Component {
                                 className="bi bi-arrow-down-square">
                             </i>
                         </button>
-                        {/* Edit button, turns to save button, when save is pushed toggled exerEditMode in exercise state and uses 'updateExerciseInfo' function passed down from Board to perform state change */}
+                        {/* Edit button, turns to save button, when save is pushed, send to vlidateEditInfo() to make sure numbers have been entered in fields, then toggled exerEditMode in exercise state and uses 'updateExerciseInfo' function passed down from Board to perform state change */}
                         {/* only toggle board and exercise edit mode if another exercise is not in edit mode (determine this by checking if boardEditMode is false in edit mode button onClick) */}
                         {!this.state.exerEditMode ? <button type="button" className="exerBtn btn btn-secondary" onClick={!this.props.boardEditMode ? event => { this.toggleEditMode(); this.props.toggleBoardEditMode(); } : null}>Edit</button> :
-                            <button type="button" className="exerBtn btn btn-success" data-exerciseid={this.state.exerciseId} onClick={event => { this.props.updateExerciseInfo(event); this.toggleEditMode(); this.props.toggleBoardEditMode(); }}>Save</button>}
-                        {/* Done button */}
+                            <button type="button" className="exerBtn btn btn-success" data-exerciseid={this.state.exerciseId} onClick={event => { this.validateEditInfo(event) }}>Save</button>}
+                        {/* Done button, turns to Cancel button when in edit mode (cancelling out of edit mode) */}
                         {!this.state.exerEditMode ?
                             <button type="button"
                                 data-direction="done"

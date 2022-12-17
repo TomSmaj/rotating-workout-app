@@ -48,7 +48,7 @@ class Board extends Component {
         let addExerciseCategory = document.getElementsByClassName("addExerciseCategoryInput")[0].value;
 
         // check to see if name is a string, the number values are infact numbers, and the blank dropdown option was not chosen
-        let isNameValid = typeof addExerciseName === 'string';
+        let isNameValid = typeof addExerciseName === 'string' && addExerciseName !== "";
         let isSetsValid = !isNaN(addExerciseSets);
         let isRepsValid = !isNaN(addExerciseReps);
         let isWeightValid = !isNaN(addExerciseWeight);
@@ -189,7 +189,7 @@ class Board extends Component {
         let exerciseId = event.target.dataset.exerciseid;
         let tempExerciseData = this.state.exerciseData;
         // check if the update is for deleting exercise
-        console.log("updatedExerciseInfo reached");
+        console.log("updateExerciseInfo reached");
         if (isDelete) {
             // create temp variables or data and info, remove the related info and order for exerciseId being deleted, set temps with exercise removed to state
             let tempOrder = this.state.exerciseOrder;
@@ -277,9 +277,7 @@ class Board extends Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className = "row addExerciseErrorMessage">
-                                    
-                                </div>
+                                <div className = "row addExerciseErrorMessage"></div>
                             </div>
                         </Modal.Body>
                         <Modal.Footer>
