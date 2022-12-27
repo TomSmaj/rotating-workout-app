@@ -1,5 +1,3 @@
-const fs = require('fs')
-
 // connect to database
 const mysql = require('mysql2');
 const connection = mysql.createConnection({
@@ -16,44 +14,6 @@ connection.connect((err) => {
 
 module.exports = function (app) {
     app.get("/get-exercise-data", (req, res) => {
-        fs.readFile('./data/exerciseData.json', 'utf8', (err, jsonString) => {
-            if (err) {
-                return;
-            }
-            const exercises = JSON.parse(jsonString);
-            res.status(200).send(exercises);
-        })
-    });
-
-    app.get("/get-exercise-order", (req, res) => {        
-        fs.readFile('./data/exerciseOrder.json', 'utf8', (err, jsonString) => {
-            if (err) {
-                return;
-            }
-            try {
-                const order = JSON.parse(jsonString);
-                res.status(200).send(order);
-            } catch (err) {
-                console.log('Error parsing JSON string:', err);
-            }
-        })        
-    })
-
-    app.get("/get-most-recent-id", (req, res) => {        
-        fs.readFile('./data/mostRecentId.json', 'utf8', (err, jsonString) => {
-            if (err) {
-                return;
-            }
-            try {
-                const mostRecentId = JSON.parse(jsonString);
-                res.status(200).send(mostRecentId);
-            } catch (err) {
-                console.log('Error parsing JSON string:', err);
-            }
-        })        
-    })
-
-    app.get("/get-exercise-data-db", (req, res) => {
         connection.query(
             'SELECT * FROM WORKOUT',
             function(err, results, fields){
@@ -66,9 +26,9 @@ module.exports = function (app) {
         );
     });
 
-    app.get("/get-exercise-order-db", (req, res) => {
+    app.get("/get-exercise-order", (req, res) => {
         connection.query(
-            'SELECT * FROM WORKOUT_X_ORDER',
+            'SELECT * FROM WORKOUT_X_ORDER ORDER BY order_id ASC',
             function(err, results, fields){
                 if (err){
                     console.log(err);
@@ -79,4 +39,17 @@ module.exports = function (app) {
         );
     });
 
+    app.get("/get-most-recent-id", (req, res) => {
+        connection.query(
+            'SELECT workout_id FROM WORKOUT ORDER BY workout_id DESC LIMIT 1',
+            function(err, results, fields){
+                if(err){
+                    console.log(err);
+                    return;
+                }
+                // should only be 1 result, so sending first index of array of results from db
+                res.status(200).send(results[0]);
+            }
+        )
+    });
 }

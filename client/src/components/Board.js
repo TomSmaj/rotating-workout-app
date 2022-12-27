@@ -3,7 +3,6 @@ import $ from 'jquery';
 import Exercise from './Exercise';
 import "./css/Board.css"
 import Modal from 'react-bootstrap/Modal';
-import Dropdown from 'react-bootstrap/Dropdown';
 
 class Board extends Component {
     constructor(props) {
@@ -25,28 +24,22 @@ class Board extends Component {
 
     componentDidMount() {
         console.log("Component Did Mount, getting Data")
+        // requests utilizing the database
         $.get("/get-exercise-data").then(res => {
-            console.log("exercise data from text file:");
-            console.log(res);
-            this.setState({ exerciseData: res });
-            // console.log("Exercise data API request complete");
+            let tempObj = {};
+            for(let exercise in res){
+                tempObj[res[exercise].workout_id] = res[exercise];
+            }
+            this.setState({ exerciseData: tempObj })
         }).then($.get("/get-exercise-order").then(res => {
-            this.setState({ exerciseOrder: res.order });
-            // console.log("Order API request complete");
+            // results are returned ordered by order_id ascending. Step through results and append workout_id to order array
+            let tempOrder = [];
+            for(let exercise in res){
+                tempOrder.push(res[exercise].workout_id);
+            }
+            this.setState({exerciseOrder: tempOrder});
         })).then($.get("/get-most-recent-id").then(res => {
-            this.setState({ mostRecentId: res.mostRecentId });
-            // console.log("Most recent id API request complete");
-        }))
-
-        $.get("/get-exercise-data-db").then(res => {
-            console.log("exercise data results from db");
-            console.log(res);
-            // returns array of objects containing workout info
-            // call function that runs through array, adds each exercise to temp object, then sets temp object to state
-        }).then($.get("/get-exercise-order-db").then(res => {
-            console.log("exercise order from db");
-            console.log(res);
-            // returns array of objects, each containing workout_id and order_id
+            this.setState({ mostRecentId: res.workout_id });
         }));
     }
 

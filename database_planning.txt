@@ -10,7 +10,7 @@ WORKOUT
     category STRING
     notes LONG STRING
     last_completed TIMESTAMP
-    done TINYINT(1)
+    done BIT
 
 WORKOUT_X_ORDER
     workout_id INT
@@ -29,7 +29,7 @@ CREATE TABLE WORKOUT (
     category varchar(255),
     notes MEDIUMBLOB,
     date_last_completed TIMESTAMP,
-    done TINYINT(1)
+    done BIT
     PRIMARY KEY (workout_id)
 )
 
@@ -39,7 +39,7 @@ CREATE TABLE WORKOUT_X_ORDER (
 )
 
 INSERT INTO WORKOUT (name, sets, reps, category) VALUES('Spread Overhand Pullups', 3, 12, 'back');
-INSERT INTO WORKOUT (name, sets, reps, category) VALUES('Close Over hand Pullups', 3, 12, 'back');
+INSERT INTO WORKOUT (name, sets, reps, category) VALUES('Close Overhand Pullups', 3, 12, 'back');
 INSERT INTO WORKOUT (name, sets, reps, category) VALUES('Underhand Pullups', 3, 12, 'arm');
 INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Bicep Curls', 4, 8, 40, 'arm');
 INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Tricep Press', 3, 12, 55, 'arm');
