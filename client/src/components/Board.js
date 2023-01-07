@@ -9,6 +9,7 @@ class Board extends Component {
         super(props);
         this.state = {
             boardEditMode: false,
+            dbActive: false,
             exerciseData: {},
             exerciseOrder: [],
             mostRecentId: 0,
@@ -89,7 +90,7 @@ class Board extends Component {
             // update the most recent exercise Id
             this.setState({ mostRecentId: newExerciseId });
 
-            this.toggleShowAddExercise();
+            this.toggleShowAddExercise();            
         }
         else{
             document.getElementsByClassName("addExerciseErrorMessage")[0].innerHTML = "Invalid input";
@@ -182,8 +183,21 @@ class Board extends Component {
         this.setState({ boardEditMode: !this.state.boardEditMode });
     }
 
+    toggleDbActive = (event) => {        
+        let elem = event.target;
+        if(!this.state.dbActive){
+            elem.classList.remove("btn-success");
+            elem.classList.add("btn-warning");
+        }
+        else{            
+            elem.classList.remove("btn-warning");
+            elem.classList.add("btn-success");
+        }                
+        this.setState({dbActive: !this.state.dbActive});
+    }
+
     // shows add exercise modal when true (is toggled by add exercise button)
-    toggleShowAddExercise = () => {
+    toggleShowAddExercise = (event) => {
         if (!this.state.boardEditMode) {
             this.setState({ showAddExercise: !this.state.showAddExercise });
         }
@@ -225,6 +239,9 @@ class Board extends Component {
         return (
             <div className="exerciseBoard">
                 <div className="container">
+                <div className="row">
+                        <button type="button" className="btn btn-success dbActiveButton col-9" onClick={event => this.toggleDbActive(event)}>{!this.state.dbActive ? "Database not Active" : "Database Active"}</button>
+                    </div>
                     <div className="row">
                         <button type="button" className="btn btn-danger exerAddButton col-9" onClick={this.toggleShowAddExercise}>Add Exercise</button>
                     </div>

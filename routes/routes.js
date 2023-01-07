@@ -28,6 +28,7 @@ module.exports = function (app) {
 
     app.get("/get-exercise-order", (req, res) => {
         connection.query(
+            // returning workout_ids in the order of the order_id (i.e. the order they will appear in)
             'SELECT * FROM WORKOUT_X_ORDER ORDER BY order_id ASC',
             function(err, results, fields){
                 if (err){
