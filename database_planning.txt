@@ -21,7 +21,7 @@ MySQL will automatically handle this, though, if workout_id is set to the unique
 thus won't need to track this with a database, each workout will receive a unique key when inserting
 
 CREATE TABLE WORKOUT (
-    workout_id INT,
+    workout_id INT AUTO_INCREMENT,
     name varchar(255),
     sets INT,
     reps INT,
@@ -29,7 +29,7 @@ CREATE TABLE WORKOUT (
     category varchar(255),
     notes MEDIUMBLOB,
     date_last_completed TIMESTAMP,
-    done BIT
+    done BIT,
     PRIMARY KEY (workout_id)
 )
 
@@ -67,4 +67,3 @@ INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(11,11);
 INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(12,12);
 INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(13,13);
 INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(14,14);
-INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(15,15);

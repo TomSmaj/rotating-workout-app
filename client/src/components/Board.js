@@ -183,6 +183,8 @@ class Board extends Component {
         this.setState({ boardEditMode: !this.state.boardEditMode });
     }
 
+    // turns dbActive on and off, as well as changes db active button from green to yellow and vice versa
+    // when this.state.dbActive is true, changes to the data will be written to the database
     toggleDbActive = (event) => {        
         let elem = event.target;
         if(!this.state.dbActive){
@@ -197,7 +199,7 @@ class Board extends Component {
     }
 
     // shows add exercise modal when true (is toggled by add exercise button)
-    toggleShowAddExercise = (event) => {
+    toggleShowAddExercise = () => {
         if (!this.state.boardEditMode) {
             this.setState({ showAddExercise: !this.state.showAddExercise });
         }
@@ -228,10 +230,15 @@ class Board extends Component {
                 name: (newExerciseName !== "" && newExerciseName !== null ? newExerciseName : this.state.exerciseData[exerciseId].name),
                 sets: (newExerciseSets !== "" && newExerciseSets !== null ? parseInt(newExerciseSets) : this.state.exerciseData[exerciseId].sets),
                 reps: (newExerciseReps !== "" && newExerciseReps !== null ? parseInt(newExerciseReps) : this.state.exerciseData[exerciseId].reps),
-                weight: (newExerciseWeight !== "" && newExerciseWeight !== null ? parseInt(newExerciseWeight) : this.state.exerciseData[exerciseId].weight)
+                weight: (newExerciseWeight !== "" && newExerciseWeight !== null ? parseInt(newExerciseWeight) : this.state.exerciseData[exerciseId].weight),
+                category: this.state.exerciseData[exerciseId].category,
+                workout_id: exerciseId
             }
             tempExerciseData[exerciseId.toString()] = tempNewExerciseObj;
             this.setState({ exerciseData: tempExerciseData });
+            if(this.state.dbActive){
+                $.post('/update-exercise-info', tempNewExerciseObj).catch(err => console.log(err))
+            }
         }
     }
 
@@ -254,7 +261,7 @@ class Board extends Component {
                                     reps={exercise.reps}
                                     weight={exercise.weight}
                                     category={exercise.category}
-                                    exerciseId={exercisePosition}
+                                    exerciseId={exercise.workout_id}
                                     moveExercise={this.moveExercise}
                                     updateExerciseInfo={this.updateExerciseInfo}
                                     toggleBoardEditMode={this.toggleBoardEditMode}
