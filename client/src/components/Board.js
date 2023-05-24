@@ -4,14 +4,24 @@ import Exercise from './Exercise';
 import "./css/Board.css"
 import Modal from 'react-bootstrap/Modal';
 
+
 class Board extends Component {
     constructor(props) {
         super(props);
         this.state = {
             boardEditMode: false,
             dbActive: false,
-            exerciseData: {},
-            exerciseOrder: [],
+            exerciseData: {
+                "0": {
+                    name: "name",
+                    sets: 0,
+                    reps: 0,
+                    weight: 0,
+                    category: "category",
+                    workout_id: 0
+                }
+            },
+            exerciseOrder: [0],
             mostRecentId: 0,
             showAddExercise: false
         }
@@ -21,28 +31,67 @@ class Board extends Component {
         this.toggleBoardEditMode = this.toggleBoardEditMode.bind(this);
         this.toggleShowAddExercise = this.toggleShowAddExercise.bind(this);
         this.updateExerciseInfo = this.updateExerciseInfo.bind(this);
+        this.updateOrderInDb = this.updateOrderInDb.bind(this);
+
+        // requests utilizing the database
+        // $.get("/get-exercise-data").then(res => {
+        //     let tempObj = {};
+        //     for (let exercise in res) {
+        //         tempObj[res[exercise].workout_id] = res[exercise];
+        //     }
+        //     this.setState({ exerciseData: tempObj })
+        // }).then($.get("/get-exercise-order").then(res => {
+        //     // results are returned ordered by order_id ascending. Step through results and append workout_id to order array
+        //     let tempOrder = [];
+        //     for (let exercise in res) {
+        //         tempOrder.push(res[exercise].workout_id);
+        //     }
+        //     this.setState({ exerciseOrder: tempOrder });
+        // })).then($.get("/get-most-recent-id").then(res => {
+        //     this.setState({ mostRecentId: res.workout_id });
+        // }));
     }
 
     componentDidMount() {
         console.log("Component Did Mount, getting Data")
         // requests utilizing the database
+        // $.get("/get-exercise-data").then(res => {
+        //     let tempObj = {};
+        //     for (let exercise in res) {
+        //         tempObj[res[exercise].workout_id] = res[exercise];
+        //     }
+        //     this.setState({ exerciseData: tempObj })
+        // }).then($.get("/get-exercise-order").then(res => {
+        //     // results are returned ordered by order_id ascending. Step through results and append workout_id to order array
+        //     let tempOrder = [];
+        //     for (let exercise in res) {
+        //         tempOrder.push(res[exercise].workout_id);
+        //     }
+        //     this.setState({ exerciseOrder: tempOrder });
+        // })).then($.get("/get-most-recent-id").then(res => {
+        //     this.setState({ mostRecentId: res.workout_id });
+        // }));
+
         $.get("/get-exercise-data").then(res => {
             let tempObj = {};
-            for(let exercise in res){
+            for (let exercise in res) {
                 tempObj[res[exercise].workout_id] = res[exercise];
             }
             this.setState({ exerciseData: tempObj })
-        }).then($.get("/get-exercise-order").then(res => {
+        });
+        $.get("/get-exercise-order").then(res => {
             // results are returned ordered by order_id ascending. Step through results and append workout_id to order array
             let tempOrder = [];
-            for(let exercise in res){
+            for (let exercise in res) {
                 tempOrder.push(res[exercise].workout_id);
             }
-            this.setState({exerciseOrder: tempOrder});
-        })).then($.get("/get-most-recent-id").then(res => {
+            this.setState({ exerciseOrder: tempOrder });
+        });
+        $.get("/get-most-recent-id").then(res => {
             this.setState({ mostRecentId: res.workout_id });
-        }));
+        });
     }
+    
 
 
     addExercise = () => {
@@ -90,9 +139,9 @@ class Board extends Component {
             // update the most recent exercise Id
             this.setState({ mostRecentId: newExerciseId });
 
-            this.toggleShowAddExercise();            
+            this.toggleShowAddExercise();
         }
-        else{
+        else {
             document.getElementsByClassName("addExerciseErrorMessage")[0].innerHTML = "Invalid input";
         }
     }
@@ -146,6 +195,8 @@ class Board extends Component {
                                 break
                             }
                         }
+                        // keep setState inside if statement so that it isn't called when no positions were actually changed
+                        this.setState({ exerciseOrder: newOrder });
                     }
                     break;
                 // if the case isn't done, then it is either up or down
@@ -172,9 +223,11 @@ class Board extends Component {
                         else {
                             break;
                         }
+                        this.updateOrderInDb(newOrder, direction, position);
+                        // keep setState inside else statement so that it isn't called when no positions were actually changed
+                        this.setState({ exerciseOrder: newOrder });
                     }
             }
-            this.setState({ exerciseOrder: newOrder });
         }
     }
 
@@ -185,17 +238,17 @@ class Board extends Component {
 
     // turns dbActive on and off, as well as changes db active button from green to yellow and vice versa
     // when this.state.dbActive is true, changes to the data will be written to the database
-    toggleDbActive = (event) => {        
+    toggleDbActive = (event) => {
         let elem = event.target;
-        if(!this.state.dbActive){
+        if (!this.state.dbActive) {
             elem.classList.remove("btn-success");
             elem.classList.add("btn-warning");
         }
-        else{            
+        else {
             elem.classList.remove("btn-warning");
             elem.classList.add("btn-success");
-        }                
-        this.setState({dbActive: !this.state.dbActive});
+        }
+        this.setState({ dbActive: !this.state.dbActive });
     }
 
     // shows add exercise modal when true (is toggled by add exercise button)
@@ -236,8 +289,54 @@ class Board extends Component {
             }
             tempExerciseData[exerciseId.toString()] = tempNewExerciseObj;
             this.setState({ exerciseData: tempExerciseData });
-            if(this.state.dbActive){
+            if (this.state.dbActive) {
                 $.post('/update-exercise-info', tempNewExerciseObj).catch(err => console.log(err))
+            }
+        }
+    }
+
+    // cycle through order state variable and update every workout's location in the database, starting at an index passed to it
+    // is called when moving, deleting, or adding an exercise
+    // updateOrderInDb = (start) => {
+    //     if (this.state.dbActive) {
+    //         // if a start position is not supplied, start at 0
+    //         if (!start) {
+    //             start = 0;
+    //         }
+    //         for (let i = start; i < this.state.exerciseOrder.length; i++) {
+    //             let updateObj = {
+    //                 'workout_id': this.state.exerciseOrder[i],
+    //                 'order_id': (i + 1)
+    //             };
+    //             $.post('/update-individual-exercise-order', updateObj).catch(err => console.log(err));
+    //         }
+    //     }
+    // }
+
+    updateOrderInDb = (newOrder, direction, position) => {
+        if (this.state.dbActive) {
+            if (direction === "done") {
+                return;
+            }
+            // direction is up or down
+            else {
+                // if the move is up, then position and position - 1 is where the switch has occurred and are the indexes to send to teh db
+                // if the move is down, then the position and position + 1 is where the switch has occurred
+                if (direction === "up") {
+                    console.log("position decremeneted");
+                    position = position - 1;
+                }
+                // position in the database starts at 1, where as in the front end data it starts at 0, thus increment it before sending anything to the db
+                let updateObj = {
+                    'first_workout_id': newOrder[position],
+                    'second_workout_id': newOrder[position + 1],
+                    'first_order_id': position + 1,
+                    'second_order_id': position + 2
+                }
+                console.log("update object: ");
+                console.log(updateObj);
+                $.post('/update-exercise-order-up-or-down', updateObj).catch(err => console.log(err));
+                return;
             }
         }
     }
@@ -246,14 +345,46 @@ class Board extends Component {
         return (
             <div className="exerciseBoard">
                 <div className="container">
-                <div className="row">
+                    <div className="row">
                         <button type="button" className="btn btn-success dbActiveButton col-9" onClick={event => this.toggleDbActive(event)}>{!this.state.dbActive ? "Database not Active" : "Database Active"}</button>
                     </div>
                     <div className="row">
                         <button type="button" className="btn btn-danger exerAddButton col-9" onClick={this.toggleShowAddExercise}>Add Exercise</button>
                     </div>
-                    {this.state.exerciseOrder.map(exercisePosition => {
-                        let exercise = this.state.exerciseData[exercisePosition];
+                    
+                    {console.log("exerciseData[0]")}
+                    {console.log(this.state.exerciseData[0])}
+                    {console.log("exerciseOrder[0]")}
+                    {console.log(this.state.exerciseOrder[0])}
+                    {console.log("exerciseData[0] OR this.state.exerciseOrder[0] === 0 ?")}
+                    {console.log(this.state.exerciseData[0] || this.state.exerciseOrder[0] === 0 ? "true" :  "false") }
+
+                    {/* using a single line if operator thing ( expression ? A : B) */}
+                    {/* if either of the default values exist (exerciseData[0] or this.state.exerciseOrder[0] === 0, which are set in state), display only exerciseData[0] */}
+                    {/* if that condition is not true, perform map function over state data */}
+                    {/* the purpose of this is to use the default values until both exerciseData and exerciseOrder have loaded, at which point the map function is used */}
+                    {/* But, if exerciseData has loaded, but exerciseOrder hasn't, the exerciseData field '0' will attempted to be accessed, but, it doesn't exist, so instead, load the first object in the array of values of the object */}
+                    {/* Could clean this up later, by hard coding default values, or changing the field name for the test values to '1' in the constructor */}
+
+                    {(this.state.exerciseData[0] || this.state.exerciseOrder[0] === 0) ?
+                        <div className="row">
+                                <Exercise name={Object.values(this.state.exerciseData)[0].name}
+                                    sets={Object.values(this.state.exerciseData)[0].sets}
+                                    reps={Object.values(this.state.exerciseData)[0].reps}
+                                    weight={Object.values(this.state.exerciseData)[0].weight}
+                                    category={Object.values(this.state.exerciseData)[0].category}
+                                    exerciseId={Object.values(this.state.exerciseData)[0].workout_id}
+                                    moveExercise={this.moveExercise}
+                                    updateExerciseInfo={this.updateExerciseInfo}
+                                    toggleBoardEditMode={this.toggleBoardEditMode}
+                                    boardEditMode={this.state.boardEditMode}
+                                    key={0} />
+                            </div>
+
+                    :
+
+                    this.state.exerciseOrder.map(exercisePosition => {
+                        let exercise = this.state.exerciseData[exercisePosition];                      
                         return (
                             <div className="row">
                                 <Exercise name={exercise.name}
@@ -269,8 +400,8 @@ class Board extends Component {
                                     key={exercisePosition} />
                             </div>
                         )
-                    })
-                    }
+                    })}
+
                     <Modal className="addExerciseModal" show={this.state.showAddExercise}>
                         <Modal.Header>
                             <Modal.Title>Add Exercise</Modal.Title>
@@ -307,7 +438,7 @@ class Board extends Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className = "row addExerciseErrorMessage"></div>
+                                <div className="row addExerciseErrorMessage"></div>
                             </div>
                         </Modal.Body>
                         <Modal.Footer>

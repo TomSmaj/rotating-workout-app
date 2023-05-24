@@ -70,7 +70,46 @@ module.exports = function (app) {
                 console.log(err);
                 return;
             }
-            res.status(200);
+            res.status(200).send();
         });
     })
+
+    app.post("/update-individual-exercise-order", (req, res) => {
+        let workout_id = req.body.workout_id;
+        let order_id = req.body.order_id;
+
+        console.log(workout_id);
+        console.log(order_id);
+
+        let sql = "UPDATE WORKOUT_X_ORDER_TEST SET order_id = ? WHERE workout_id = ?";
+        connection.query(sql, [order_id, workout_id], function(err, rows, field) {
+            if (err){
+                console.log(err);
+                return;
+            }
+            res.status(200).send();
+        });
+    });
+
+    // Board.js will sent workout_id and and new order_id of 2 exercises. Send one query to DB to update the order_id of these 2 workouts
+    app.post("/update-exercise-order-up-or-down", (req, res) => {        
+        let first_workout_id = parseInt(req.body.first_workout_id); 
+        let second_workout_id = parseInt(req.body.second_workout_id);
+        let first_order_id = parseInt(req.body.first_order_id); 
+        let second_order_id = parseInt(req.body.second_order_id);
+
+        let sql = `UPDATE WORKOUT_X_ORDER_TEST
+                    SET order_id = (case when workout_id = ? then ?
+                                        when workout_id = ? then ?
+                                    end)
+                        WHERE workout_id in (?, ?);`;
+        connection.query(sql, [first_workout_id, first_order_id, second_workout_id, second_order_id, first_workout_id, second_workout_id], function(err, rows, field){
+            if(err){
+                console.log(err);
+                return;
+            }
+            res.status(200).send();
+        });
+    });
+    
 }
