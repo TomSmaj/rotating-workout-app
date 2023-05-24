@@ -32,46 +32,10 @@ class Board extends Component {
         this.toggleShowAddExercise = this.toggleShowAddExercise.bind(this);
         this.updateExerciseInfo = this.updateExerciseInfo.bind(this);
         this.updateOrderInDb = this.updateOrderInDb.bind(this);
-
-        // requests utilizing the database
-        // $.get("/get-exercise-data").then(res => {
-        //     let tempObj = {};
-        //     for (let exercise in res) {
-        //         tempObj[res[exercise].workout_id] = res[exercise];
-        //     }
-        //     this.setState({ exerciseData: tempObj })
-        // }).then($.get("/get-exercise-order").then(res => {
-        //     // results are returned ordered by order_id ascending. Step through results and append workout_id to order array
-        //     let tempOrder = [];
-        //     for (let exercise in res) {
-        //         tempOrder.push(res[exercise].workout_id);
-        //     }
-        //     this.setState({ exerciseOrder: tempOrder });
-        // })).then($.get("/get-most-recent-id").then(res => {
-        //     this.setState({ mostRecentId: res.workout_id });
-        // }));
     }
 
     componentDidMount() {
         console.log("Component Did Mount, getting Data")
-        // requests utilizing the database
-        // $.get("/get-exercise-data").then(res => {
-        //     let tempObj = {};
-        //     for (let exercise in res) {
-        //         tempObj[res[exercise].workout_id] = res[exercise];
-        //     }
-        //     this.setState({ exerciseData: tempObj })
-        // }).then($.get("/get-exercise-order").then(res => {
-        //     // results are returned ordered by order_id ascending. Step through results and append workout_id to order array
-        //     let tempOrder = [];
-        //     for (let exercise in res) {
-        //         tempOrder.push(res[exercise].workout_id);
-        //     }
-        //     this.setState({ exerciseOrder: tempOrder });
-        // })).then($.get("/get-most-recent-id").then(res => {
-        //     this.setState({ mostRecentId: res.workout_id });
-        // }));
-
         $.get("/get-exercise-data").then(res => {
             let tempObj = {};
             for (let exercise in res) {
@@ -351,13 +315,6 @@ class Board extends Component {
                     <div className="row">
                         <button type="button" className="btn btn-danger exerAddButton col-9" onClick={this.toggleShowAddExercise}>Add Exercise</button>
                     </div>
-                    
-                    {console.log("exerciseData[0]")}
-                    {console.log(this.state.exerciseData[0])}
-                    {console.log("exerciseOrder[0]")}
-                    {console.log(this.state.exerciseOrder[0])}
-                    {console.log("exerciseData[0] OR this.state.exerciseOrder[0] === 0 ?")}
-                    {console.log(this.state.exerciseData[0] || this.state.exerciseOrder[0] === 0 ? "true" :  "false") }
 
                     {/* using a single line if operator thing ( expression ? A : B) */}
                     {/* if either of the default values exist (exerciseData[0] or this.state.exerciseOrder[0] === 0, which are set in state), display only exerciseData[0] */}
