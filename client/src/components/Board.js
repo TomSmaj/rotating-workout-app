@@ -284,7 +284,7 @@ class Board extends Component {
             }
             // direction is up or down
             else {
-                // if the move is up, then position and position - 1 is where the switch has occurred and are the indexes to send to teh db
+                // if the move is up, then position and position - 1 is where the switch has occurred and are the indexes to send to the db
                 // if the move is down, then the position and position + 1 is where the switch has occurred
                 if (direction === "up") {
                     console.log("position decremeneted");
@@ -320,17 +320,16 @@ class Board extends Component {
                     {/* if either of the default values exist (exerciseData[0] or this.state.exerciseOrder[0] === 0, which are set in state), display only exerciseData[0] */}
                     {/* if that condition is not true, perform map function over state data */}
                     {/* the purpose of this is to use the default values until both exerciseData and exerciseOrder have loaded, at which point the map function is used */}
-                    {/* But, if exerciseData has loaded, but exerciseOrder hasn't, the exerciseData field '0' will attempted to be accessed, but, it doesn't exist, so instead, load the first object in the array of values of the object */}
-                    {/* Could clean this up later, by hard coding default values, or changing the field name for the test values to '1' in the constructor */}
+                    {/* But, if exerciseData has loaded, and exerciseOrder hasn't, hard coded values will be displayed until Data and Order are loaded*/}
 
                     {(this.state.exerciseData[0] || this.state.exerciseOrder[0] === 0) ?
                         <div className="row">
-                                <Exercise name={Object.values(this.state.exerciseData)[0].name}
-                                    sets={Object.values(this.state.exerciseData)[0].sets}
-                                    reps={Object.values(this.state.exerciseData)[0].reps}
-                                    weight={Object.values(this.state.exerciseData)[0].weight}
-                                    category={Object.values(this.state.exerciseData)[0].category}
-                                    exerciseId={Object.values(this.state.exerciseData)[0].workout_id}
+                                <Exercise name={"name"}
+                                    sets={0}
+                                    reps={0}
+                                    weight={0}
+                                    category={"category"}
+                                    exerciseId={0}
                                     moveExercise={this.moveExercise}
                                     updateExerciseInfo={this.updateExerciseInfo}
                                     toggleBoardEditMode={this.toggleBoardEditMode}
