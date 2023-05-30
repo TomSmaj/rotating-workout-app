@@ -65,6 +65,7 @@ module.exports = function (app) {
         let workout_id = req.body.workout_id;
 
         let sql = "UPDATE WORKOUT_TEST SET name= ? , sets= ? , reps= ? , weight= ? , category= ? WHERE workout_id = ?";
+        console.log(sql);
         connection.query(sql, [name, sets, reps, weight, category, workout_id], function (err, rows, fields) {
             if (err) {
                 console.log(err);
@@ -74,24 +75,7 @@ module.exports = function (app) {
         });
     })
 
-    app.post("/update-individual-exercise-order", (req, res) => {
-        let workout_id = req.body.workout_id;
-        let order_id = req.body.order_id;
-
-        console.log(workout_id);
-        console.log(order_id);
-
-        let sql = "UPDATE WORKOUT_X_ORDER_TEST SET order_id = ? WHERE workout_id = ?";
-        connection.query(sql, [order_id, workout_id], function(err, rows, field) {
-            if (err){
-                console.log(err);
-                return;
-            }
-            res.status(200).send();
-        });
-    });
-
-    // Board.js will sent workout_id and and new order_id of 2 exercises. Send one query to DB to update the order_id of these 2 workouts
+    // Board.js will sent workout_id and new order_id of 2 exercises. Send one query to DB to update the order_id of these 2 workouts
     app.post("/update-exercise-order-up-or-down", (req, res) => {        
         let first_workout_id = parseInt(req.body.first_workout_id); 
         let second_workout_id = parseInt(req.body.second_workout_id);
@@ -103,6 +87,7 @@ module.exports = function (app) {
                                         when workout_id = ? then ?
                                     end)
                         WHERE workout_id in (?, ?);`;
+        console.log(sql);                
         connection.query(sql, [first_workout_id, first_order_id, second_workout_id, second_order_id, first_workout_id, second_workout_id], function(err, rows, field){
             if(err){
                 console.log(err);
@@ -111,5 +96,51 @@ module.exports = function (app) {
             res.status(200).send();
         });
     });
+
+    app.post("/update-exercise-order-done", (req, res) => {        
+        let newOrder = req.body.newOrder; 
+        // position of clicked exercise in order array, index for array starts at zero
+        let position = parseInt(req.body.position);
+
+        for(order in newOrder){
+            newOrder[order] = parseInt(newOrder[order]);
+        }
+
+        let sqlStatement1 = 'UPDATE WORKOUT_X_ORDER_TEST SET order_id = (case when workout_id = ? then ? when workout_id = ? then ?'
+        let sqlStatement2 = ' end) WHERE workout_id in (?,?';
+
+        // need to increment position an addition +1 to compensate for the DB starting at 1 where as in state the order starts at 0
+        paramArray1 = [newOrder[position], position + 1, newOrder[position + 1], position + 2];
+        paramArray2 = [newOrder[position], newOrder[position + 1]];
+
+        // appending to the sql statement strings. In the above we have the first 2 instances hard coded, so starting 2 after the position
+        for(let i = position + 2; i < newOrder.length; i++){
+            sqlStatement1 += " when workout_id = ? then ?";
+            sqlStatement2 += ",?"
+            paramArray1.push(newOrder[i]);
+            // newOrder array index starts at 0, but DB order starts at 1, so increment value being set for order for the sql statement
+            paramArray1.push(i + 1);
+            paramArray2.push(newOrder[i]);
+        }
+
+        let sql = sqlStatement1 + sqlStatement2 + ");"        
+        let paramArray = paramArray1.concat(paramArray2);
+        console.log(sql);
+        console.log(paramArray);
+
+        connection.query(sql, paramArray, function(err, rows, field){
+            if(err){
+                console.log(err);
+                return;
+            }
+            res.status(200).send();
+        });
+    });
+
+    // forseeing that when an exercise is a deleted, the order id of all exercises following that exercise will need to be decremented
+    // make 2 separate sql requests from this route, one to delete the exercise, and the other to update the order id of all following exercises
+    app.post("/delete-exercise-by-id", (req, res) => {
+        res.status.send();
+    })
     
 }

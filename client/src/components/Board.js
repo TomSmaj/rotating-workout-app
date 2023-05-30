@@ -159,6 +159,7 @@ class Board extends Component {
                                 break
                             }
                         }
+                        this.updateOrderInDb(newOrder, direction, position);
                         // keep setState inside if statement so that it isn't called when no positions were actually changed
                         this.setState({ exerciseOrder: newOrder });
                     }
@@ -259,28 +260,18 @@ class Board extends Component {
         }
     }
 
-    // cycle through order state variable and update every workout's location in the database, starting at an index passed to it
-    // is called when moving, deleting, or adding an exercise
-    // updateOrderInDb = (start) => {
-    //     if (this.state.dbActive) {
-    //         // if a start position is not supplied, start at 0
-    //         if (!start) {
-    //             start = 0;
-    //         }
-    //         for (let i = start; i < this.state.exerciseOrder.length; i++) {
-    //             let updateObj = {
-    //                 'workout_id': this.state.exerciseOrder[i],
-    //                 'order_id': (i + 1)
-    //             };
-    //             $.post('/update-individual-exercise-order', updateObj).catch(err => console.log(err));
-    //         }
-    //     }
-    // }
-
+    // called from moveExercise(), rights new order of exercise to the database after an exercise has been moved up or down
     updateOrderInDb = (newOrder, direction, position) => {
+        let updateObj = {};
         if (this.state.dbActive) {
             if (direction === "done") {
-                return;
+                console.log(newOrder);
+                console.log(newOrder[position]);
+                updateObj = {
+                    'newOrder': newOrder,
+                    'position': position,
+                }
+                $.post('/update-exercise-order-done', updateObj).catch(err => console.log(err));
             }
             // direction is up or down
             else {
@@ -291,7 +282,7 @@ class Board extends Component {
                     position = position - 1;
                 }
                 // position in the database starts at 1, where as in the front end data it starts at 0, thus increment it before sending anything to the db
-                let updateObj = {
+                updateObj = {
                     'first_workout_id': newOrder[position],
                     'second_workout_id': newOrder[position + 1],
                     'first_order_id': position + 1,
