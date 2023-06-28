@@ -37,7 +37,8 @@ class Board extends Component {
     componentDidMount() {
         console.log("Component Did Mount, getting Data")
         $.get("/get-exercise-data").then(res => {
-            let tempObj = {};
+            // res is an array of objects for each exercise, the fields for each being the individual columns from the WORKOUT table
+;            let tempObj = {};
             for (let exercise in res) {
                 tempObj[res[exercise].workout_id] = res[exercise];
             }
@@ -45,6 +46,7 @@ class Board extends Component {
         });
         $.get("/get-exercise-order").then(res => {
             // results are returned ordered by order_id ascending. Step through results and append workout_id to order array
+            // res is an array of objects for each exercise, each containing workout_id and order_id field
             let tempOrder = [];
             for (let exercise in res) {
                 tempOrder.push(res[exercise].workout_id);
@@ -224,6 +226,7 @@ class Board extends Component {
     }
 
     // passed into each exercise component via props, is accessed by edit mode save button
+    // also where exercise is deleted
     updateExerciseInfo = (event) => {
         let isDelete = event.target.dataset.delete;
         let exerciseId = event.target.dataset.exerciseid;
@@ -260,7 +263,7 @@ class Board extends Component {
         }
     }
 
-    // called from moveExercise(), rights new order of exercise to the database after an exercise has been moved up or down
+    // called from moveExercise(), writes new order of exercise to the database after an exercise has been moved up or down
     updateOrderInDb = (newOrder, direction, position) => {
         let updateObj = {};
         if (this.state.dbActive) {
@@ -281,12 +284,11 @@ class Board extends Component {
                     console.log("position decremeneted");
                     position = position - 1;
                 }
-                // position in the database starts at 1, where as in the front end data it starts at 0, thus increment it before sending anything to the db
                 updateObj = {
                     'first_workout_id': newOrder[position],
                     'second_workout_id': newOrder[position + 1],
-                    'first_order_id': position + 1,
-                    'second_order_id': position + 2
+                    'first_order_id': position,
+                    'second_order_id': position + 1
                 }
                 console.log("update object: ");
                 console.log(updateObj);

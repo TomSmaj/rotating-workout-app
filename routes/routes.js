@@ -109,8 +109,7 @@ module.exports = function (app) {
         let sqlStatement1 = 'UPDATE WORKOUT_X_ORDER_TEST SET order_id = (case when workout_id = ? then ? when workout_id = ? then ?'
         let sqlStatement2 = ' end) WHERE workout_id in (?,?';
 
-        // need to increment position an addition +1 to compensate for the DB starting at 1 where as in state the order starts at 0
-        paramArray1 = [newOrder[position], position + 1, newOrder[position + 1], position + 2];
+        paramArray1 = [newOrder[position], position, newOrder[position + 1], position + 1];
         paramArray2 = [newOrder[position], newOrder[position + 1]];
 
         // appending to the sql statement strings. In the above we have the first 2 instances hard coded, so starting 2 after the position
@@ -118,8 +117,7 @@ module.exports = function (app) {
             sqlStatement1 += " when workout_id = ? then ?";
             sqlStatement2 += ",?"
             paramArray1.push(newOrder[i]);
-            // newOrder array index starts at 0, but DB order starts at 1, so increment value being set for order for the sql statement
-            paramArray1.push(i + 1);
+            paramArray1.push(i);
             paramArray2.push(newOrder[i]);
         }
 
@@ -140,7 +138,40 @@ module.exports = function (app) {
     // forseeing that when an exercise is a deleted, the order id of all exercises following that exercise will need to be decremented
     // make 2 separate sql requests from this route, one to delete the exercise, and the other to update the order id of all following exercises
     app.post("/delete-exercise-by-id", (req, res) => {
-        res.status.send();
+        // going to need id to delete, and orderId list
+        let newOrder = req.body.newOrder; 
+        // position of clicked exercise to be deleted
+        let deleteWorkoutId = parseInt(req.body.deleteWorkoutId);
+        let deleteOrderId = parseInt(req.body.deleteOrderId);
+
+        let workoutDeleteSql = 'DELETE FROM WORKOUT_TEST WHERE workout_id = ?';
+        let orderDeleteSql = 'DELETE FROM WORKOUT_X_ORDER_TEST WHERE workout_id = ?';
+        let orderUpdateSql = 'UPDATE WORKOUT_X_ORDER_TEST SET order_id = order_id - 1 WHERE order_id > ?'
+
+        // delete the exercise from the workout table based on the workout id
+        connection.query(workoutDeleteSql, deleteWorkoutId, function(err, rows, field){
+            if(err){
+                console.log(err);
+                return;
+            }
+        });
+
+        // delete the exercise from the order table based on the workout id
+        connection.query(orderDeleteSql, deleteOrderId, function(err, rows, field){
+            if(err){
+                console.log(err);
+                return;
+            }
+        });
+
+        // decrement the order_id of every exercise with order_id > than the one being deleted
+        connection.query(orderUpdateSql, deleteOrderId, function(err, rows, field){
+            if(err){
+                console.log(err);
+                return;
+            }
+            res.status(200).send();
+        });
     })
     
 }
