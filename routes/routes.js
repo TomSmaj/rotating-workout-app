@@ -1,11 +1,20 @@
+require('dotenv').config();
+const DB_HOST = process.env.DB_HOST;
+const DB_USER = process.env.DB_USER;
+const DB_PASSWORD = process.env.DB_PASSWORD;
+const DB = process.env.DB;
+const DB_PORT = process.env.DB_PORT;
+const WORKOUT_TABLE = process.env.WORKOUT_TABLE;
+const WORKOUT_X_ORDER_TABLE = process.env.WORKOUT_X_ORDER_TABLE;
+
 // connect to database
 const mysql = require('mysql2');
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'r00tr00t',
-    database: 'rotating_workout',
-    port: 3306
+    host: DB_HOST,
+    user: DB_USER,
+    password: DB_PASSWORD,
+    database: DB,
+    port: DB_PORT
 });
 connection.connect((err) => {
     if (err) throw err;
@@ -15,7 +24,7 @@ connection.connect((err) => {
 module.exports = function (app) {
     app.get("/get-exercise-data", (req, res) => {
         connection.query(
-            'SELECT * FROM WORKOUT_TEST',
+            'SELECT * FROM ' + WORKOUT_TABLE,
             function (err, results, fields) {
                 if (err) {
                     console.log(err);
@@ -29,7 +38,7 @@ module.exports = function (app) {
     app.get("/get-exercise-order", (req, res) => {
         connection.query(
             // returning workout_ids in the order of the order_id (i.e. the order they will appear in)
-            'SELECT * FROM WORKOUT_X_ORDER_TEST ORDER BY order_id ASC',
+            'SELECT * FROM ' + WORKOUT_X_ORDER_TABLE + ' ORDER BY order_id ASC',
             function (err, results, fields) {
                 if (err) {
                     console.log(err);
@@ -42,7 +51,7 @@ module.exports = function (app) {
 
     app.get("/get-most-recent-id", (req, res) => {
         connection.query(
-            'SELECT workout_id FROM WORKOUT_TEST ORDER BY workout_id DESC LIMIT 1',
+            'SELECT workout_id FROM ' + WORKOUT_TABLE + ' ORDER BY workout_id DESC LIMIT 1',
             function (err, results, fields) {
                 if (err) {
                     console.log(err);
@@ -54,7 +63,7 @@ module.exports = function (app) {
         )
     });
 
-    // UPDATE rotating_workout.WORKOUT_TEST SET name='This is a new name', sets=30, reps=14, weight=300, category='front' WHERE workout_id = 1; 
+    // UPDATE rotating_workout.WORKOUT SET name='This is a new name', sets=30, reps=14, weight=300, category='front' WHERE workout_id = 1; 
     app.post("/update-exercise-info", (req, res) => {
         
         let name = req.body.name;
@@ -64,7 +73,7 @@ module.exports = function (app) {
         let category = req.body.category;
         let workout_id = req.body.workout_id;
 
-        let sql = "UPDATE WORKOUT_TEST SET name= ? , sets= ? , reps= ? , weight= ? , category= ? WHERE workout_id = ?";
+        let sql = "UPDATE " + WORKOUT_TABLE + " SET name= ? , sets= ? , reps= ? , weight= ? , category= ? WHERE workout_id = ?";
         console.log(sql);
         connection.query(sql, [name, sets, reps, weight, category, workout_id], function (err, rows, fields) {
             if (err) {
@@ -82,7 +91,7 @@ module.exports = function (app) {
         let first_order_id = parseInt(req.body.first_order_id); 
         let second_order_id = parseInt(req.body.second_order_id);
 
-        let sql = `UPDATE WORKOUT_X_ORDER_TEST
+        let sql = `UPDATE ` + WORKOUT_X_ORDER_TABLE + `
                     SET order_id = (case when workout_id = ? then ?
                                         when workout_id = ? then ?
                                     end)
@@ -106,7 +115,7 @@ module.exports = function (app) {
             newOrder[order] = parseInt(newOrder[order]);
         }
 
-        let sqlStatement1 = 'UPDATE WORKOUT_X_ORDER_TEST SET order_id = (case when workout_id = ? then ? when workout_id = ? then ?'
+        let sqlStatement1 = 'UPDATE ' + WORKOUT_X_ORDER_TABLE + ' SET order_id = (case when workout_id = ? then ? when workout_id = ? then ?'
         let sqlStatement2 = ' end) WHERE workout_id in (?,?';
 
         paramArray1 = [newOrder[position], position, newOrder[position + 1], position + 1];
@@ -124,7 +133,6 @@ module.exports = function (app) {
         let sql = sqlStatement1 + sqlStatement2 + ");"        
         let paramArray = paramArray1.concat(paramArray2);
         console.log(sql);
-        console.log(paramArray);
 
         connection.query(sql, paramArray, function(err, rows, field){
             if(err){
@@ -144,9 +152,9 @@ module.exports = function (app) {
         let deleteWorkoutId = parseInt(req.body.deleteWorkoutId);
         let deleteOrderId = parseInt(req.body.deleteOrderId);
 
-        let workoutDeleteSql = 'DELETE FROM WORKOUT_TEST WHERE workout_id = ?';
-        let orderDeleteSql = 'DELETE FROM WORKOUT_X_ORDER_TEST WHERE workout_id = ?';
-        let orderUpdateSql = 'UPDATE WORKOUT_X_ORDER_TEST SET order_id = order_id - 1 WHERE order_id > ?'
+        let workoutDeleteSql = 'DELETE FROM ' + WORKOUT_TABLE + ' WHERE workout_id = ?';
+        let orderDeleteSql = 'DELETE FROM ' + WORKOUT_X_ORDER_TABLE + ' WHERE workout_id = ?';
+        let orderUpdateSql = 'UPDATE ' + WORKOUT_X_ORDER_TABLE + ' SET order_id = order_id - 1 WHERE order_id > ?'
 
         // delete the exercise from the workout table based on the workout id
         connection.query(workoutDeleteSql, deleteWorkoutId, function(err, rows, field){
