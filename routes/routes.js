@@ -22,6 +22,43 @@ connection.connect((err) => {
 });
 
 module.exports = function (app) {
+
+    // pass in exercise info and what the order id should be of the new exercise and enter both into respective tables
+    app.post("/add-exercise", (req, res) => {
+        let name = req.body.name;
+        let sets = (req.body.sets ? req.body.sets : null);
+        let reps = (req.body.reps ? req.body.reps : null);;
+        let weight = (req.body.weight ? req.body.weight : null);
+        let category = req.body.category;
+        let newOrderId = req.body.newOrderId;
+        let paramArray = [name, sets, reps, weight, category, newOrderId];
+
+        let sql1 = `INSERT INTO ` + WORKOUT_TABLE + ` (name, sets, reps, weight, category) VALUES(?, ?, ?, ?, ?);`;
+        let sql2 = `INSERT INTO ` + WORKOUT_X_ORDER_TABLE + ` (workout_id, order_id) VALUES(?, ?);`;
+
+        console.log(sql1);
+        console.log(paramArray);
+        connection.query(sql1, paramArray, function (err, results, fields) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            else {
+                // get autoincremented id from WORKOUT table and insert it into WORKOUT_X_ORDER
+                let paramArray2 = [results.insertId, newOrderId];
+                console.log(sql2);                
+                console.log(paramArray2);
+                connection.query(sql2, paramArray2, function () {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    res.status(200).send();
+                })
+            }
+        });
+    })
+
     app.get("/get-exercise-data", (req, res) => {
         connection.query(
             'SELECT * FROM ' + WORKOUT_TABLE,
@@ -65,17 +102,19 @@ module.exports = function (app) {
 
     // UPDATE rotating_workout.WORKOUT SET name='This is a new name', sets=30, reps=14, weight=300, category='front' WHERE workout_id = 1; 
     app.post("/update-exercise-info", (req, res) => {
-        
+
         let name = req.body.name;
         let sets = (req.body.sets ? req.body.sets : null);
         let reps = (req.body.reps ? req.body.reps : null);;
         let weight = (req.body.weight ? req.body.weight : null);
         let category = req.body.category;
         let workout_id = req.body.workout_id;
+        let paramArray = [name, sets, reps, weight, category, workout_id];
 
         let sql = "UPDATE " + WORKOUT_TABLE + " SET name= ? , sets= ? , reps= ? , weight= ? , category= ? WHERE workout_id = ?";
         console.log(sql);
-        connection.query(sql, [name, sets, reps, weight, category, workout_id], function (err, rows, fields) {
+        console.log(paramArray);
+        connection.query(sql, paramArray, function (err, results, fields) {
             if (err) {
                 console.log(err);
                 return;
@@ -85,20 +124,22 @@ module.exports = function (app) {
     })
 
     // Board.js will sent workout_id and new order_id of 2 exercises. Send one query to DB to update the order_id of these 2 workouts
-    app.post("/update-exercise-order-up-or-down", (req, res) => {        
-        let first_workout_id = parseInt(req.body.first_workout_id); 
+    app.post("/update-exercise-order-up-or-down", (req, res) => {
+        let first_workout_id = parseInt(req.body.first_workout_id);
         let second_workout_id = parseInt(req.body.second_workout_id);
-        let first_order_id = parseInt(req.body.first_order_id); 
+        let first_order_id = parseInt(req.body.first_order_id);
         let second_order_id = parseInt(req.body.second_order_id);
+        let paramArray = [first_workout_id, first_order_id, second_workout_id, second_order_id, first_workout_id, second_workout_id];
 
         let sql = `UPDATE ` + WORKOUT_X_ORDER_TABLE + `
                     SET order_id = (case when workout_id = ? then ?
                                         when workout_id = ? then ?
                                     end)
                         WHERE workout_id in (?, ?);`;
-        console.log(sql);                
-        connection.query(sql, [first_workout_id, first_order_id, second_workout_id, second_order_id, first_workout_id, second_workout_id], function(err, rows, field){
-            if(err){
+        console.log(sql);
+        console.log(paramArray);
+        connection.query(sql, paramArray, function (err, results, field) {
+            if (err) {
                 console.log(err);
                 return;
             }
@@ -106,12 +147,12 @@ module.exports = function (app) {
         });
     });
 
-    app.post("/update-exercise-order-done", (req, res) => {        
-        let newOrder = req.body.newOrder; 
+    app.post("/update-exercise-order-done", (req, res) => {
+        let newOrder = req.body.newOrder;
         // position of clicked exercise in order array, index for array starts at zero
         let position = parseInt(req.body.position);
 
-        for(order in newOrder){
+        for (order in newOrder) {
             newOrder[order] = parseInt(newOrder[order]);
         }
 
@@ -122,7 +163,7 @@ module.exports = function (app) {
         paramArray2 = [newOrder[position], newOrder[position + 1]];
 
         // appending to the sql statement strings. In the above we have the first 2 instances hard coded, so starting 2 after the position
-        for(let i = position + 2; i < newOrder.length; i++){
+        for (let i = position + 2; i < newOrder.length; i++) {
             sqlStatement1 += " when workout_id = ? then ?";
             sqlStatement2 += ",?"
             paramArray1.push(newOrder[i]);
@@ -130,12 +171,12 @@ module.exports = function (app) {
             paramArray2.push(newOrder[i]);
         }
 
-        let sql = sqlStatement1 + sqlStatement2 + ");"        
+        let sql = sqlStatement1 + sqlStatement2 + ");"
         let paramArray = paramArray1.concat(paramArray2);
         console.log(sql);
-
-        connection.query(sql, paramArray, function(err, rows, field){
-            if(err){
+        console.log(paramArray);
+        connection.query(sql, paramArray, function (err, results, field) {
+            if (err) {
                 console.log(err);
                 return;
             }
@@ -146,9 +187,7 @@ module.exports = function (app) {
     // forseeing that when an exercise is a deleted, the order id of all exercises following that exercise will need to be decremented
     // make 2 separate sql requests from this route, one to delete the exercise, and the other to update the order id of all following exercises
     app.post("/delete-exercise-by-id", (req, res) => {
-        // going to need id to delete, and orderId list
-        let newOrder = req.body.newOrder; 
-        // position of clicked exercise to be deleted
+        // ids of clicked exercise to be deleted
         let deleteWorkoutId = parseInt(req.body.deleteWorkoutId);
         let deleteOrderId = parseInt(req.body.deleteOrderId);
 
@@ -156,30 +195,42 @@ module.exports = function (app) {
         let orderDeleteSql = 'DELETE FROM ' + WORKOUT_X_ORDER_TABLE + ' WHERE workout_id = ?';
         let orderUpdateSql = 'UPDATE ' + WORKOUT_X_ORDER_TABLE + ' SET order_id = order_id - 1 WHERE order_id > ?'
 
+        console.log("deleteWorkoutId: " + deleteWorkoutId);
+        console.log("deleteOrderId: " + deleteOrderId);
+
         // delete the exercise from the workout table based on the workout id
-        connection.query(workoutDeleteSql, deleteWorkoutId, function(err, rows, field){
-            if(err){
+        console.log(workoutDeleteSql);
+        console.log(deleteWorkoutId);
+        connection.query(workoutDeleteSql, deleteWorkoutId, function (err, results, field) {
+            if (err) {
                 console.log(err);
                 return;
+            }
+            else {
+                // delete the exercise from the order table based on the workout id
+                console.log(orderDeleteSql);
+                console.log(deleteWorkoutId);
+                connection.query(orderDeleteSql, deleteWorkoutId, function (err, results, field) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    else {
+                        // decrement the order_id of every exercise with order_id > than the one being deleted
+                        console.log(orderUpdateSql);
+                        console.log(deleteOrderId);
+                        connection.query(orderUpdateSql, deleteOrderId, function (err, results, field) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            res.status(200).send();
+                        });
+                    }
+                });
             }
         });
 
-        // delete the exercise from the order table based on the workout id
-        connection.query(orderDeleteSql, deleteOrderId, function(err, rows, field){
-            if(err){
-                console.log(err);
-                return;
-            }
-        });
-
-        // decrement the order_id of every exercise with order_id > than the one being deleted
-        connection.query(orderUpdateSql, deleteOrderId, function(err, rows, field){
-            if(err){
-                console.log(err);
-                return;
-            }
-            res.status(200).send();
-        });
     })
-    
+
 }
