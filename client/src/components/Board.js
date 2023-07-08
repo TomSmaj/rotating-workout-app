@@ -3,15 +3,24 @@ import $ from 'jquery';
 import Exercise from './Exercise';
 import "./css/Board.css"
 import Modal from 'react-bootstrap/Modal';
-import Dropdown from 'react-bootstrap/Dropdown';
+
 
 class Board extends Component {
     constructor(props) {
         super(props);
         this.state = {
             boardEditMode: false,
-            exerciseData: {},
-            exerciseOrder: [],
+            exerciseData: {
+                "0": {
+                    name: "name",
+                    sets: 0,
+                    reps: 0,
+                    weight: 0,
+                    category: "category",
+                    workout_id: 0
+                }
+            },
+            exerciseOrder: [0],
             mostRecentId: 0,
             showAddExercise: false
         }
@@ -21,21 +30,33 @@ class Board extends Component {
         this.toggleBoardEditMode = this.toggleBoardEditMode.bind(this);
         this.toggleShowAddExercise = this.toggleShowAddExercise.bind(this);
         this.updateExerciseInfo = this.updateExerciseInfo.bind(this);
+        this.updateOrderInDb = this.updateOrderInDb.bind(this);
     }
 
     componentDidMount() {
         console.log("Component Did Mount, getting Data")
         $.get("/get-exercise-data").then(res => {
-            this.setState({ exerciseData: res });
-            // console.log("Exercise data API request complete");
-        }).then($.get("/get-exercise-order").then(res => {
-            this.setState({ exerciseOrder: res.order });
-            // console.log("Order API request complete");
-        })).then($.get("/get-most-recent-id").then(res => {
-            this.setState({ mostRecentId: res.mostRecentId });
-            // console.log("Most recent id API request complete");
-        }))
+            // res is an array of objects for each exercise, the fields for each being the individual columns from the WORKOUT table
+            let tempObj = {};
+            for (let exercise in res) {
+                tempObj[res[exercise].workout_id] = res[exercise];
+            }
+            this.setState({ exerciseData: tempObj })
+        });
+        $.get("/get-exercise-order").then(res => {
+            // results are returned ordered by order_id ascending. Step through results and append workout_id to order array
+            // res is an array of objects for each exercise, each containing workout_id and order_id field
+            let tempOrder = [];
+            for (let exercise in res) {
+                tempOrder.push(res[exercise].workout_id);
+            }
+            this.setState({ exerciseOrder: tempOrder });
+        });
+        $.get("/get-most-recent-id").then(res => {
+            this.setState({ mostRecentId: res.workout_id });
+        });
     }
+
 
 
     addExercise = () => {
@@ -58,6 +79,7 @@ class Board extends Component {
         if (isNameValid && isSetsValid && isRepsValid && isWeightValid && isCategoryValid) {
             // increment the Id from most recent Id variable, since the most recent one is the last one in use
             let newExerciseId = this.state.mostRecentId + 1;
+            let newOrderId = this.state.exerciseOrder.length;
 
             // put new values in object
             let newExercise = {
@@ -76,16 +98,22 @@ class Board extends Component {
             let tempExerciseOrder = this.state.exerciseOrder;
             tempExerciseOrder.push(newExerciseId);
 
-            // set the state values to the temp variables (which have the new exercise added)
-            this.setState({ exerciseData: tempExerciseData });
-            this.setState({ exerciseOrder: tempExerciseOrder });
+            // get what order_id should be of new exercise           
+            console.log("order id for new exercise: " + newOrderId);
+            newExercise["newOrderId"] = newOrderId;
+            // make API call to add-exercise (provide exercise info and new order_id)
+                $.post('/add-exercise', newExercise).then(res => {
+                    // set the state values to the temp variables (which have the new exercise added)
+                    this.setState({ exerciseData: tempExerciseData });
+                    this.setState({ exerciseOrder: tempExerciseOrder });
 
-            // update the most recent exercise Id
-            this.setState({ mostRecentId: newExerciseId });
+                    // update the most recent exercise Id
+                    this.setState({ mostRecentId: newExerciseId });
+                });
 
             this.toggleShowAddExercise();
         }
-        else{
+        else {
             document.getElementsByClassName("addExerciseErrorMessage")[0].innerHTML = "Invalid input";
         }
     }
@@ -139,6 +167,9 @@ class Board extends Component {
                                 break
                             }
                         }
+                        this.updateOrderInDb(newOrder, direction, position);
+                        // keep setState inside if statement so that it isn't called when no positions were actually changed
+                        this.setState({ exerciseOrder: newOrder });
                     }
                     break;
                 // if the case isn't done, then it is either up or down
@@ -165,9 +196,11 @@ class Board extends Component {
                         else {
                             break;
                         }
+                        this.updateOrderInDb(newOrder, direction, position);
+                        // keep setState inside else statement so that it isn't called when no positions were actually changed
+                        this.setState({ exerciseOrder: newOrder });
                     }
             }
-            this.setState({ exerciseOrder: newOrder });
         }
     }
 
@@ -184,6 +217,7 @@ class Board extends Component {
     }
 
     // passed into each exercise component via props, is accessed by edit mode save button
+    // also where exercise is deleted
     updateExerciseInfo = (event) => {
         let isDelete = event.target.dataset.delete;
         let exerciseId = event.target.dataset.exerciseid;
@@ -191,13 +225,20 @@ class Board extends Component {
         // check if the update is for deleting exercise
         console.log("updateExerciseInfo reached");
         if (isDelete) {
-            // create temp variables or data and info, remove the related info and order for exerciseId being deleted, set temps with exercise removed to state
+            // create temp variables or data and info, remove the related info and order for exerciseId being deleted, set temps with exercise removed to state            
             let tempOrder = this.state.exerciseOrder;
             let deleteOrderIndex = tempOrder.indexOf(parseInt(exerciseId));
-            delete tempExerciseData[exerciseId];
-            tempOrder.splice(deleteOrderIndex, 1);
-            this.setState({ exerciseData: tempExerciseData });
-            this.setState({ exerciseOrder: tempOrder });
+            let deleteObject = {
+                "deleteWorkoutId": exerciseId,
+                "deleteOrderId": deleteOrderIndex
+            }
+
+            $.post("/delete-exercise-by-id", deleteObject).then(res => {
+                delete tempExerciseData[exerciseId];
+                tempOrder.splice(deleteOrderIndex, 1);
+                this.setState({ exerciseData: tempExerciseData });
+                this.setState({ exerciseOrder: tempOrder });
+            })
         }
         else {
             let newExerciseName = document.getElementsByClassName("exerciseNameInput-" + exerciseId)[0].value;
@@ -208,10 +249,47 @@ class Board extends Component {
                 name: (newExerciseName !== "" && newExerciseName !== null ? newExerciseName : this.state.exerciseData[exerciseId].name),
                 sets: (newExerciseSets !== "" && newExerciseSets !== null ? parseInt(newExerciseSets) : this.state.exerciseData[exerciseId].sets),
                 reps: (newExerciseReps !== "" && newExerciseReps !== null ? parseInt(newExerciseReps) : this.state.exerciseData[exerciseId].reps),
-                weight: (newExerciseWeight !== "" && newExerciseWeight !== null ? parseInt(newExerciseWeight) : this.state.exerciseData[exerciseId].weight)
+                weight: (newExerciseWeight !== "" && newExerciseWeight !== null ? parseInt(newExerciseWeight) : this.state.exerciseData[exerciseId].weight),
+                category: this.state.exerciseData[exerciseId].category,
+                workout_id: exerciseId
             }
             tempExerciseData[exerciseId.toString()] = tempNewExerciseObj;
             this.setState({ exerciseData: tempExerciseData });
+            $.post('/update-exercise-info', tempNewExerciseObj).catch(err => console.log(err))
+
+        }
+    }
+
+    // called from moveExercise(), writes new order of exercise to the database after an exercise has been moved up or down
+    updateOrderInDb = (newOrder, direction, position) => {
+        let updateObj = {};
+        if (direction === "done") {
+            console.log(newOrder);
+            console.log(newOrder[position]);
+            updateObj = {
+                'newOrder': newOrder,
+                'position': position,
+            }
+            $.post('/update-exercise-order-done', updateObj).catch(err => console.log(err));
+        }
+        // direction is up or down
+        else {
+            // if the move is up, then position and position - 1 is where the switch has occurred and are the indexes to send to the db
+            // if the move is down, then the position and position + 1 is where the switch has occurred
+            if (direction === "up") {
+                console.log("position decremeneted");
+                position = position - 1;
+            }
+            updateObj = {
+                'first_workout_id': newOrder[position],
+                'second_workout_id': newOrder[position + 1],
+                'first_order_id': position,
+                'second_order_id': position + 1
+            }
+            console.log("update object: ");
+            console.log(updateObj);
+            $.post('/update-exercise-order-up-or-down', updateObj).catch(err => console.log(err));
+            return;
         }
     }
 
@@ -222,25 +300,49 @@ class Board extends Component {
                     <div className="row">
                         <button type="button" className="btn btn-danger exerAddButton col-9" onClick={this.toggleShowAddExercise}>Add Exercise</button>
                     </div>
-                    {this.state.exerciseOrder.map(exercisePosition => {
-                        let exercise = this.state.exerciseData[exercisePosition];
-                        return (
-                            <div className="row">
-                                <Exercise name={exercise.name}
-                                    sets={exercise.sets}
-                                    reps={exercise.reps}
-                                    weight={exercise.weight}
-                                    category={exercise.category}
-                                    exerciseId={exercisePosition}
-                                    moveExercise={this.moveExercise}
-                                    updateExerciseInfo={this.updateExerciseInfo}
-                                    toggleBoardEditMode={this.toggleBoardEditMode}
-                                    boardEditMode={this.state.boardEditMode}
-                                    key={exercisePosition} />
-                            </div>
-                        )
-                    })
-                    }
+
+                    {/* using a single line if operator thing ( expression ? A : B) */}
+                    {/* if either of the default values exist (exerciseData[0] or this.state.exerciseOrder[0] === 0, which are set in state), display only exerciseData[0] */}
+                    {/* if that condition is not true, perform map function over state data */}
+                    {/* the purpose of this is to use the default values until both exerciseData and exerciseOrder have loaded, at which point the map function is used */}
+                    {/* But, if exerciseData has loaded, and exerciseOrder hasn't, hard coded values will be displayed until Data and Order are loaded*/}
+
+                    {(this.state.exerciseData[0] || this.state.exerciseOrder[0] === 0) ?
+                        <div className="row">
+                            <Exercise name={"name"}
+                                sets={0}
+                                reps={0}
+                                weight={0}
+                                category={"category"}
+                                exerciseId={0}
+                                moveExercise={this.moveExercise}
+                                updateExerciseInfo={this.updateExerciseInfo}
+                                toggleBoardEditMode={this.toggleBoardEditMode}
+                                boardEditMode={this.state.boardEditMode}
+                                key={0} />
+                        </div>
+
+                        :
+
+                        this.state.exerciseOrder.map(exercisePosition => {
+                            let exercise = this.state.exerciseData[exercisePosition];
+                            return (
+                                <div className="row">
+                                    <Exercise name={exercise.name}
+                                        sets={exercise.sets}
+                                        reps={exercise.reps}
+                                        weight={exercise.weight}
+                                        category={exercise.category}
+                                        exerciseId={exercise.workout_id}
+                                        moveExercise={this.moveExercise}
+                                        updateExerciseInfo={this.updateExerciseInfo}
+                                        toggleBoardEditMode={this.toggleBoardEditMode}
+                                        boardEditMode={this.state.boardEditMode}
+                                        key={exercisePosition} />
+                                </div>
+                            )
+                        })}
+
                     <Modal className="addExerciseModal" show={this.state.showAddExercise}>
                         <Modal.Header>
                             <Modal.Title>Add Exercise</Modal.Title>
@@ -277,7 +379,7 @@ class Board extends Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className = "row addExerciseErrorMessage"></div>
+                                <div className="row addExerciseErrorMessage"></div>
                             </div>
                         </Modal.Body>
                         <Modal.Footer>

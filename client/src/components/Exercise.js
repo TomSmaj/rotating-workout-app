@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import "./css/Exercise.css"
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Modal';
 
 class Exercise extends Component {
     constructor(props) {

@@ -10,6 +10,11 @@
     margin-right: auto;
 }
 
+.dbActiveButton{
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .addExerciseErrorMessage{
     color: red;
 }
