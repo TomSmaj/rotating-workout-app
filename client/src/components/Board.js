@@ -21,7 +21,6 @@ class Board extends Component {
                 }
             },
             exerciseOrder: [0],
-            mostRecentId: 0,
             showAddExercise: false
         }
 
@@ -29,6 +28,7 @@ class Board extends Component {
         this.moveExercise = this.moveExercise.bind(this);
         this.toggleBoardEditMode = this.toggleBoardEditMode.bind(this);
         this.toggleShowAddExercise = this.toggleShowAddExercise.bind(this);
+        //this.updateBoard = this.updateBoard.bind(this);
         this.updateExerciseInfo = this.updateExerciseInfo.bind(this);
         this.updateOrderInDb = this.updateOrderInDb.bind(this);
     }
@@ -52,12 +52,30 @@ class Board extends Component {
             }
             this.setState({ exerciseOrder: tempOrder });
         });
-        $.get("/get-most-recent-id").then(res => {
-            this.setState({ mostRecentId: res.workout_id });
-        });
     }
 
-
+    // gets exercise info and exercise data from table and sets it to state
+    // intended to be called after any change to the DB is made to reflect any changes that have been made
+    updateBoard() {
+        console.log("Updating board.");
+        $.get("/get-exercise-data").then(res => {
+            // res is an array of objects for each exercise, the fields for each being the individual columns from the WORKOUT table
+            let tempObj = {};
+            for (let exercise in res) {
+                tempObj[res[exercise].workout_id] = res[exercise];
+            }
+            this.setState({ exerciseData: tempObj })
+        });
+        $.get("/get-exercise-order").then(res => {
+            // results are returned ordered by order_id ascending. Step through results and append workout_id to order array
+            // res is an array of objects for each exercise, each containing workout_id and order_id field
+            let tempOrder = [];
+            for (let exercise in res) {
+                tempOrder.push(res[exercise].workout_id);
+            }
+            this.setState({ exerciseOrder: tempOrder });
+        });
+    }
 
     addExercise = () => {
 
@@ -77,8 +95,6 @@ class Board extends Component {
 
         // perform exercise addition if all above 5 varaible are true
         if (isNameValid && isSetsValid && isRepsValid && isWeightValid && isCategoryValid) {
-            // increment the Id from most recent Id variable, since the most recent one is the last one in use
-            let newExerciseId = this.state.mostRecentId + 1;
             let newOrderId = this.state.exerciseOrder.length;
 
             // put new values in object
@@ -87,31 +103,18 @@ class Board extends Component {
                 "sets": addExerciseSets,
                 "reps": addExerciseReps,
                 "weight": addExerciseWeight,
-                "category": addExerciseCategory
+                "category": addExerciseCategory,
+                "newOrderId": newOrderId
             };
 
-            // create a temporary variable to hold all exercise data, then add newExercise with the newExerciseId as the field
-            let tempExerciseData = this.state.exerciseData;
-            tempExerciseData[String(newExerciseId)] = newExercise;
-
-            // create a temporary variable to hold exercise order, add new exercise to end
-            let tempExerciseOrder = this.state.exerciseOrder;
-            tempExerciseOrder.push(newExerciseId);
-
-            // get what order_id should be of new exercise           
-            console.log("order id for new exercise: " + newOrderId);
-            newExercise["newOrderId"] = newOrderId;
             // make API call to add-exercise (provide exercise info and new order_id)
                 $.post('/add-exercise', newExercise).then(res => {
-                    // set the state values to the temp variables (which have the new exercise added)
-                    this.setState({ exerciseData: tempExerciseData });
-                    this.setState({ exerciseOrder: tempExerciseOrder });
-
-                    // update the most recent exercise Id
-                    this.setState({ mostRecentId: newExerciseId });
+                    console.log("reached 'then' of add exercise");                    
+                    this.updateBoard();
                 });
-
+                        
             this.toggleShowAddExercise();
+            
         }
         else {
             document.getElementsByClassName("addExerciseErrorMessage")[0].innerHTML = "Invalid input";
@@ -168,8 +171,6 @@ class Board extends Component {
                             }
                         }
                         this.updateOrderInDb(newOrder, direction, position);
-                        // keep setState inside if statement so that it isn't called when no positions were actually changed
-                        this.setState({ exerciseOrder: newOrder });
                     }
                     break;
                 // if the case isn't done, then it is either up or down
@@ -197,8 +198,6 @@ class Board extends Component {
                             break;
                         }
                         this.updateOrderInDb(newOrder, direction, position);
-                        // keep setState inside else statement so that it isn't called when no positions were actually changed
-                        this.setState({ exerciseOrder: newOrder });
                     }
             }
         }
@@ -234,11 +233,8 @@ class Board extends Component {
             }
 
             $.post("/delete-exercise-by-id", deleteObject).then(res => {
-                delete tempExerciseData[exerciseId];
-                tempOrder.splice(deleteOrderIndex, 1);
-                this.setState({ exerciseData: tempExerciseData });
-                this.setState({ exerciseOrder: tempOrder });
-            })
+                this.updateBoard();
+            });
         }
         else {
             let newExerciseName = document.getElementsByClassName("exerciseNameInput-" + exerciseId)[0].value;
@@ -254,8 +250,10 @@ class Board extends Component {
                 workout_id: exerciseId
             }
             tempExerciseData[exerciseId.toString()] = tempNewExerciseObj;
-            this.setState({ exerciseData: tempExerciseData });
-            $.post('/update-exercise-info', tempNewExerciseObj).catch(err => console.log(err))
+
+            $.post('/update-exercise-info', tempNewExerciseObj).then(res => {
+                this.updateBoard();
+            });
 
         }
     }
@@ -270,7 +268,9 @@ class Board extends Component {
                 'newOrder': newOrder,
                 'position': position,
             }
-            $.post('/update-exercise-order-done', updateObj).catch(err => console.log(err));
+            $.post('/update-exercise-order-done', updateObj).then(res => {
+                this.updateBoard();
+            });
         }
         // direction is up or down
         else {
@@ -288,8 +288,9 @@ class Board extends Component {
             }
             console.log("update object: ");
             console.log(updateObj);
-            $.post('/update-exercise-order-up-or-down', updateObj).catch(err => console.log(err));
-            return;
+            $.post('/update-exercise-order-up-or-down', updateObj).then(res => {
+                this.updateBoard();
+            });
         }
     }
 
