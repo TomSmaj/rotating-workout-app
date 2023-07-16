@@ -1,11 +1,12 @@
 require('dotenv').config();
-const DB_HOST = process.env.DB_HOST;
-const DB_USER = process.env.DB_USER;
-const DB_PASSWORD = process.env.DB_PASSWORD;
-const DB = process.env.DB;
-const DB_PORT = process.env.DB_PORT;
-const WORKOUT_TABLE = process.env.WORKOUT_TABLE;
-const WORKOUT_X_ORDER_TABLE = process.env.WORKOUT_X_ORDER_TABLE;
+const config = require('../config.js');
+const DB_HOST = config.DB_HOST;
+const DB_USER = config.DB_USER;
+const DB_PASSWORD = config.DB_PASSWORD;
+const DB = config.DB;
+const DB_PORT = config.DB_PORT;
+const WORKOUT_TABLE = config.WORKOUT_TABLE;
+const WORKOUT_X_ORDER_TABLE = config.WORKOUT_X_ORDER_TABLE;
 
 // connect to database
 const mysql = require('mysql2');

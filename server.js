@@ -1,3 +1,4 @@
+const config = require('./config.js');
 const express = require("express");
 const path = require("path");
 const port = process.env.PORT || 3001;
@@ -11,7 +12,7 @@ app.use(express.static("public"));
 // Define API routes here
 require("./routes/routes.js")(app);
 
-console.log('are we in production?', process.env.NODE_ENV)
+console.log('are we in production?', config.NODE_ENV)
 
 // console.log that your server is up and running
 app.listen(port, () => console.log(`Listening on port ${port}`));
