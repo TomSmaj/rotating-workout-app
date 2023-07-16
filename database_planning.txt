@@ -1,0 +1,69 @@
+MySQL schema is 'rotating_workout'
+
+TABLES:
+WORKOUT
+    workout_id INT
+    name STRING
+    sets INT
+    reps INT
+    weight INT
+    category STRING
+    notes LONG STRING
+    last_completed TIMESTAMP
+    done BIT
+
+WORKOUT_X_ORDER
+    workout_id INT
+    order INT
+
+mostRecentId is stored to keep track of what the ID will be for the next workout created
+MySQL will automatically handle this, though, if workout_id is set to the unique key
+thus won't need to track this with a database, each workout will receive a unique key when inserting
+
+CREATE TABLE WORKOUT (
+    workout_id INT AUTO_INCREMENT,
+    name varchar(255),
+    sets INT,
+    reps INT,
+    weight FLOAT,
+    category varchar(255),
+    notes MEDIUMBLOB,
+    date_last_completed TIMESTAMP,
+    done BIT,
+    PRIMARY KEY (workout_id)
+)
+
+CREATE TABLE WORKOUT_X_ORDER (
+    workout_id INT,
+    order_id INT
+)
+
+INSERT INTO WORKOUT (name, sets, reps, category) VALUES('Spread Overhand Pullups', 3, 12, 'back');
+INSERT INTO WORKOUT (name, sets, reps, category) VALUES('Close Overhand Pullups', 3, 12, 'back');
+INSERT INTO WORKOUT (name, sets, reps, category) VALUES('Underhand Pullups', 3, 12, 'arm');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Bicep Curls', 4, 8, 40, 'arm');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Tricep Press', 3, 12, 55, 'arm');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Bench Press', 3, 12, 140, 'chest');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Dumbbell Flies', 3, 12, 55, 'chest');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Inclined Dumbbell Bench', 3, 12, 55, 'chest');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Reverse Flies', 3, 15, 20, 'back');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Dead Lifts', 3, 12, 140, 'back');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Linear Leg Press', 3, 12, 230, 'leg');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Shoulders', 3, 12, 20, 'arm');
+INSERT INTO WORKOUT (name, sets, reps, category) VALUES('Bicycle Situps', 1, 600, 'core');
+INSERT INTO WORKOUT (name, sets, reps, weight, category) VALUES('Weighted Twist Situps', 3, 15, 16, 'core');
+
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(1,1);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(2,2);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(3,3);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(4,4);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(5,5);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(6,6);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(7,7);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(8,8);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(9,9);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(10,10);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(11,11);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(12,12);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(13,13);
+INSERT INTO WORKOUT_X_ORDER (workout_id, order_id) VALUES(14,14);
