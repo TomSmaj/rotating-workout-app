@@ -6,6 +6,7 @@
   "scripts": {
     "start": "if-env NODE_ENV=production && npm run start:prod || npm run start:dev",
     "start:prod": "export NODE_ENV=production&& concurrently \"forever -c node server.js\" \"npm run client\"",
+    "start:prod-build": "export NODE_ENV=development && node server.js",
     "start:dev": "export NODE_ENV=development&& concurrently \"nodemon --ignore 'client/*'\" \"npm run client\"",
     "client": "cd client && npm run start"
   },
