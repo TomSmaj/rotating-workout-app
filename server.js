@@ -15,10 +15,6 @@ require("./routes/routes.js")(app);
 
 console.log("are we in production?", config.NODE_ENV);
 
-app.get("*", (req, res) => {
-  res.redirect(config.CLOUDFRONT_DIST_DOMAIN);
-});
-
 app.use(cors());
 
 // console.log that your server is up and running
