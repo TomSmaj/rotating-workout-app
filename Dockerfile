@@ -1,7 +1,8 @@
-FROM node:18
+FROM node:22
+RUN apt-get update && apt-get install -y nodejs npm
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
@@ -13,11 +14,11 @@ RUN npm install
 # RUN npm ci --omit=dev
 
 # Bundle app source
-COPY . .
+COPY . ./
 
 #server.js port
 EXPOSE 3000 
 EXPOSE 3001 
 #db port
 EXPOSE 3306
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:dev"]
