@@ -66,9 +66,6 @@ module.exports = function (app) {
   });
 
   app.get("/get-exercise-data", (req, res) => {
-    console.log("DB_USER: " + DB_USER);
-    console.log("DB_PASSWORD: " + DB_PASSWORD);
-    console.log("DB_HOST: " + DB_HOST);
     pool.query(
       "SELECT * FROM " + WORKOUT_TABLE,
       function (err, results, fields) {

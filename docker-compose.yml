@@ -25,8 +25,8 @@ services:
       NODE_ENV: production
       DB_HOST: mysql
       DB_USER: root
-      DB_PASS: r00tr00t
-      DB_NAME: workout_app
+      DB_PASSWORD: r00tr00t
+      DB: workout_app
     stdin_open: true
     tty: true
     command: npm run start:prod
